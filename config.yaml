@@ -1,0 +1,11 @@
+ipv4:
+  enable: true
+  url: https://api-ipv4.ip.sb/ip
+ipv6:
+  enable: true
+  url: https://api-ipv6.ip.sb/ip
+
+dns:
+  name: alidns
+  id: 1234567890
+  secret: 1234567890
