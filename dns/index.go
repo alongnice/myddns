@@ -1,7 +1,64 @@
 package dns
 
-import "myddns/config"
+import (
+	"log"
+	"myddns/config"
+	"strings"
+)
 
+// DNS 接口 添加初始化和更新的方法
 type DNS interface {
-	AddRecord(conf *config.Config) (ipv4 bool, ipv6 bool)
+	// AddRecord(conf *config.Config) (ipv4 bool, ipv6 bool)
+	init(conf *config.Config)
+	AddUpdateIpv4DomainRecords()
+	// 添加或更新IPv4记录
+	AddUpdateIpv6DomainRecords()
+	// 添加或更新IPv6记录
+}
+
+// ipv4,ipv6的域
+type Domains struct {
+	Ipv4Addr    string
+	Ipv4Domains []*Domain
+	Ipv6Addr    string
+	Ipv6Domains []*Domain
+}
+
+// Domain 域名实体对象包含 域名和子域名 以及是否可用
+type Domain struct {
+	DomainName string
+	SubDomain  string
+	Exist      bool
+}
+
+// 创建域名实体对象的构造（字符串处理）
+func (d Domain) String() string {
+	return d.SubDomain + "." + d.DomainName
+}
+
+// ParseDomain 解析域名,传入域名数组 返回域名实体数组
+func ParseDomain(domainArr []string) (domains []*Domain) {
+	// 解析域名
+	for _, domainStr := range domainArr {
+		// 遍历域名数组
+		domain := &Domain{}
+		// 构建一个域名实体对象
+		sp := strings.Split(domainStr, ".")
+		// 切片分割，进行异常判断
+		length := len(sp)
+		if length <= 1 { // 错误情况
+			log.Println(domainStr, "域名不正确")
+			continue
+		} else if length == 2 { //单个域名情况
+			domain.DomainName = domainStr
+		} else { // >=3
+			domain.DomainName = sp[length-2] + "." + sp[length-1]
+			// 子域名
+			domain.SubDomain = domainStr[:len(domainStr)-len(domain.DomainName)-1]
+			// 判断是否可用
+		}
+		domains = append(domains, domain)
+		// 添加到域名实体数组
+	}
+	return
 }

@@ -19,5 +19,8 @@ func main() {
 	case "alidns":
 		dnsSelected = &dns.Alidns{}
 	}
-	dnsSelected.AddRecord()
+	// dnsSelected.AddRecord()
+	dnsSelected.init(conf)
+	dnsSelected.AddUpdateIpv4DomainRecords()
+	dnsSelected.AddUpdateIpv6DomainRecords()
 }
