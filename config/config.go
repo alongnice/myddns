@@ -47,41 +47,46 @@ func (conf *Config) GetConfigFromFile() {
 	yaml.Unmarshal(byt, conf)
 	// 对byt进行操作，切片解码给到conf
 }
-func (conf *Config) GetIpv4Addr() (result string, err error) {
+
+func (conf *Config) GetIpv4Addr() (result string) {
 	// 从配置文件中读取ipv4地址
-	resp, err := http.Get(conf.Ipv4.URL)
-	if err != nil {
-		// log.Println("获取ipv4地址失败")
-		log.Println("ipv4 解析失败", conf.Ipv4.URL)
-		return "", err
+	if conf.Ipv4.Enable {
+		resp, err := http.Get(conf.Ipv4.URL)
+		if err != nil {
+			// log.Println("获取ipv4地址失败")
+			log.Println("ipv4 获取失败", conf.Ipv4.URL)
+			return
+		}
+		defer resp.Body.Close()
+		// body, err := ioutill.ReadFile(resp.Body)
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			log.Println("ipv4 结果读取失败", conf.Ipv4.URL)
+			return
+		}
+		comp := regexp.MustCompile(Ipv4Reg)
+		result = comp.FindString(string(body))
 	}
-	defer resp.Body.Close()
-	// body, err := ioutill.ReadFile(resp.Body)
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		log.Println("ipv4 结果读取失败", conf.Ipv4.URL)
-		return
-	}
-	comp := regexp.MustCompile(Ipv4Reg)
-	result = comp.FindString(string(body))
 	return
 }
 
-func (conf *Config) GetIpv6Addr() (result string, err error) {
+func (conf *Config) GetIpv6Addr() (result string) {
 	// 从配置文件中读取ipv6地址
-	resp, err := http.Get(conf.Ipv4.URL)
-	if err != nil {
-		log.Println("ipv6 解析失败", conf.Ipv6.URL)
+	if conf.Ipv6.Enable {
+		resp, err := http.Get(conf.Ipv4.URL)
+		if err != nil {
+			log.Println("ipv6 获取失败", conf.Ipv6.URL)
+		}
+		defer resp.Body.Close()
+		// body, err := ioutill.ReadFile(resp.Body)
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			log.Println("ipv6结果读取失败", conf.Ipv6.URL)
+			return
+		}
+		comp := regexp.MustCompile(Ipv6Reg)
+		result = comp.FindString(string(body))
 	}
-	defer resp.Body.Close()
-	// body, err := ioutill.ReadFile(resp.Body)
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		log.Println("获取ipv6地址失败")
-		return
-	}
-	comp := regexp.MustCompile(Ipv6Reg)
-	result = comp.FindString(string(body))
 	return
 
 }
