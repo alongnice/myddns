@@ -1,26 +1,31 @@
 package main
 
 import (
-	"myddns/config"
-	"myddns/dns"
+	"myddns/util"
+	"myddns/web"
+
+	"log"
+	"net/http"
+	"time"
 )
 
-const (
-	ipv4Addr = "https://api-ipv4.ip.sb/ip"
-	ipv6Addr = "https://api-ipv6.ip.sb/ip"
-)
+const port = "12138"
 
 func main() {
-	conf := &config.Config{}
-	conf.GetConfigFromFile()
+	// 启动静态文件服务
+	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
+	http.Handle("/favicon.ico", http.StripPrefix("/", http.FileServer(http.Dir("static"))))
 
-	var dnsSelected dns.DNS
-	switch conf.DNS.Name {
-	case "alidns":
-		dnsSelected = &dns.Alidns{}
+	http.HandleFunc("/", web.Writing)
+	http.HandleFunc("/save", web.Save)
+
+	// 新建协程,打开浏览器
+	go util.OpenExplore("http://127.0.0.1:" + port)
+	log.Println(port, " 端口启动", "...")
+
+	err := http.ListenAndServe(":"+port, nil)
+	if err != nil {
+		log.Println("启动时端口发生异常,1分钟内自动关闭窗口", err)
+		time.Sleep(time.Minute)
 	}
-	// dnsSelected.AddRecord()
-	dnsSelected.init(conf)
-	dnsSelected.AddUpdateIpv4DomainRecords()
-	dnsSelected.AddUpdateIpv6DomainRecords()
 }
