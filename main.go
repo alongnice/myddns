@@ -1,6 +1,7 @@
 package main
 
 import (
+	"myddns/static"
 	"myddns/util"
 	"myddns/web"
 
@@ -13,10 +14,11 @@ const port = "12138"
 
 func main() {
 	// 启动静态文件服务
-	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
-	http.Handle("/favicon.ico", http.StripPrefix("/", http.FileServer(http.Dir("static"))))
-	// http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(AssetFile())))
-	// http.Handle("/favicon.ico", http.StripPrefix("/", http.FileServer(AssetFile())))
+	// http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
+	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(static.AssetFile())))
+	// http.Handle("/favicon.ico", http.StripPrefix("/", http.FileServer(http.Dir("static"))))
+	http.Handle("/favicon.ico", http.StripPrefix("/", http.FileServer(static.AssetFile())))
+
 
 	http.HandleFunc("/", web.Writing)
 	http.HandleFunc("/save", web.Save)

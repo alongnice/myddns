@@ -8,24 +8,19 @@ import (
 	"net/http"
 	"os"
 	"text/template"
-
+	"log"
 	"gopkg.in/yaml.v2"
 )
 
 func Writing(writer http.ResponseWriter, request *http.Request) {
-	data, err := Asset("static/pages/writing.html")
+	tempPath, err := util.GetStaticResourcePath("static/pages/writing.html")
 	if err != nil {
-		// asset 没找到
-	}
-	tempFile := os.TempDir() + string(os.PathSeparator) + "writing.html"
-	err = ioutil.WriteFile(tempFile, data, 0600)
-	if err != nil {
-		http.Error(writer, "Error writing temporary file", http.StatusInternalServerError)
+		log.Println("Asset 没找到.")
 		return
 	}
-	tmpl, err := template.ParseFiles(tempFile)
+	tmpl, err := template.ParseFiles(tempPath)
 	if err != nil {
-		fmt.Println("错误发生")
+		fmt.Println("Error 发生..")
 		fmt.Println(err)
 		return
 	}

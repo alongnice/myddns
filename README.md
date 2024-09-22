@@ -5,6 +5,6 @@
 - 复刻自 ddns-go
 
 
-> go-bindata -pkg web -o web/pages-data.go static/pages/...
-> 
-> go-bindata -fs -prefix "static/" static/
+### go get -u github.com/go-bindata/go-bindata/...
+### go-bindata -debug -pkg util -o util/staticPagesData.go static/pages/...
+### go-bindata -pkg static -o static/js_css_data.go -fs -prefix "static/" static/
