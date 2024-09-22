@@ -13,7 +13,17 @@ import (
 )
 
 func Writing(writer http.ResponseWriter, request *http.Request) {
-	tmpl, err := template.ParseFiles("./static/pages/writing.html")
+	data, err := Asset("static/pages/writing.html")
+	if err != nil {
+		// asset 没找到
+	}
+	tempFile := os.TempDir() + string(os.PathSeparator) + "writing.html"
+	err = ioutil.WriteFile(tempFile, data, 0600)
+	if err != nil {
+		http.Error(writer, "Error writing temporary file", http.StatusInternalServerError)
+		return
+	}
+	tmpl, err := template.ParseFiles(tempFile)
 	if err != nil {
 		fmt.Println("错误发生")
 		fmt.Println(err)
