@@ -32,7 +32,7 @@ jobs:
         version: latest
         args: release
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.MYDDNS_TOKEN }}
       # 运行 run GoReleaser 这是一个自动化go项目发布工具
       # 如果推送标签时触发
       # 传递参数为 latest 和 --rm-dist
