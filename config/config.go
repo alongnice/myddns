@@ -3,6 +3,7 @@ package config
 import (
 	"io"
 	"log"
+	"myddns/util"
 	"net/http"
 	"os"
 	"regexp"
@@ -35,17 +36,24 @@ type Config struct {
 	}
 }
 
-func (conf *Config) GetConfigFromFile() {
+func (conf *Config) InitConfigFromFile() error {
 	// 从文件中读取配置
-	// byt, err := ioutil.ReadFile("config.yaml")
+	configFilePath := util.GetConfigFromFile()
+	_, err := os.Stat(configFilePath)
+	if err != nil {
+		log.Println("config.yaml 文件不存在")
+		return err
+	}
 	byt, err := os.ReadFile("config.yaml")
 	if err != nil {
 		log.Println("config.yaml 读取失败")
+		return err
 	}
 	log.Panicln("config.yaml 读取成功")
 	// 解析配置
 	yaml.Unmarshal(byt, conf)
 	// 对byt进行操作，切片解码给到conf
+	return nil
 }
 
 func (conf *Config) GetIpv4Addr() (result string) {

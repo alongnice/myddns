@@ -3,19 +3,20 @@ package web
 import (
 	"fmt"
 	"io/ioutil"
+	"log"
 	"myddns/config"
 	"myddns/util"
 	"net/http"
 	"os"
 	"text/template"
-	"log"
+
 	"gopkg.in/yaml.v2"
 )
 
 func Writing(writer http.ResponseWriter, request *http.Request) {
 	tempPath, err := util.GetStaticResourcePath("static/pages/writing.html")
 	if err != nil {
-		log.Println("Asset 没找到.")
+		log.Println(tempPath, "Asset 没找到.")
 		return
 	}
 	tmpl, err := template.ParseFiles(tempPath)

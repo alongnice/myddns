@@ -4,12 +4,13 @@ import (
 	"log"
 	"myddns/config"
 	"strings"
+	"time"
 )
 
 // DNS 接口 添加初始化和更新的方法
 type DNS interface {
 	// AddRecord(conf *config.Config) (ipv4 bool, ipv6 bool)
-	init(conf *config.Config)
+	Init(conf *config.Config)
 	AddUpdateIpv4DomainRecords()
 	// 添加或更新IPv4记录
 	AddUpdateIpv6DomainRecords()
@@ -34,6 +35,32 @@ type Domain struct {
 // 创建域名实体对象的构造（字符串处理）
 func (d Domain) String() string {
 	return d.SubDomain + "." + d.DomainName
+}
+
+// runOnce
+func RunOnce() {
+	conf := &config.Config{}
+	err := conf.InitConfigFromFile()
+	if err != nil {
+		return
+	}
+
+	var dnsSelected DNS
+	switch conf.DNS.Name {
+	case "alidns":
+		dnsSelected = &Alidns{}
+	}
+	dnsSelected.Init(conf)
+	dnsSelected.AddUpdateIpv4DomainRecords()
+	dnsSelected.AddUpdateIpv6DomainRecords()
+}
+
+// RunTimer 定时运行
+func RunTimer() {
+	for {
+		RunOnce()
+		time.Sleep(time.Second * time.Duration(5))
+	}
 }
 
 // ParseDomain 解析域名,传入域名数组 返回域名实体数组

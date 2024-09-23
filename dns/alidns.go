@@ -1,3 +1,125 @@
+// package dns
+
+// import (
+// 	"log"
+// 	"myddns/config"
+
+// 	alidnssdk "github.com/aliyun/alibaba-cloud-sdk-go/services/alidns"
+// 	// "github.com/aliyun/alibaba-cloud-sdk-go/services/alidns"
+// 	// 库后期将被弃用，暂时保留
+// )
+
+// // 阿里云DNS实现
+// type Alidns struct {
+// 	client *alidnssdk.Client
+// 	Domains
+// }
+
+// // func (ali *Alidns) init(conf *config.Config) {
+// // 	ali.Init(conf)
+// // }
+
+// // Init 初始化
+// func (ali *Alidns) Init(conf *config.Config) {
+// 	client, err := alidnssdk.NewClientWithAccessKey("cn-hangzhou", conf.DNS.ID, conf.DNS.Secret)
+// 	if err != nil {
+// 		log.Println("Ali dns 链接失败")
+// 		// return false, false
+// 	}
+// 	ali.client = client
+
+// 	// Ipv4
+// 	ipv4Addr := conf.GetIpv4Addr()
+// 	if ipv4Addr != "" {
+// 		ali.Ipv4Addr = ipv4Addr
+// 		ali.Ipv4Domains = ParseDomain(conf.Ipv4.Domains)
+// 	}
+
+// 	// Ipv6
+// 	ipv6Addr := conf.GetIpv6Addr()
+// 	if ipv6Addr != "" {
+// 		ali.Ipv6Addr = ipv6Addr
+// 		ali.Ipv6Domains = ParseDomain(conf.Ipv6.Domains)
+// 	}
+
+// }
+
+// /* // AddRecord 添加记录
+// func (alidns *Alidns) AddRecord(conf *config.Config) (ipv4 bool, ipv6 bool) {
+
+// 	ipv4Stat := addIpv4Record(client, conf)
+// 	ipv6Stat := addIpv6Record(client, conf)
+// 	return ipv4Stat, ipv6Stat
+// } */
+
+// func (ali *Alidns) AddUpdateIpv4DomainRecords() {
+// 	ali.AddUpdateIpvDomainRecords("A")
+// }
+// func (ali *Alidns) AddUpdateIpv6DomainRecords() {
+// 	ali.AddUpdateIpvDomainRecords("AAAA")
+// }
+
+// func (ali *Alidns) AddUpdateIpvDomainRecords(typ string) {
+// 	typeName := "ipv4"
+// 	ipAddr := ali.Ipv4Addr
+// 	domains := ali.Ipv4Domains
+// 	if typ == "AAAA" {
+// 		typeName = "ipv6"
+// 		ipAddr = ali.Ipv6Addr
+// 		domains = ali.Ipv6Domains
+// 	}
+// 	if ipAddr == "" {
+// 		return
+// 	}
+
+// 	existReq := alidnssdk.CreateDescribeSubDomainRecordsRequest()
+// 	existReq.Type = typ
+
+// 	for _, dom := range domains {
+// 		existReq.SubDomain = dom.SubDomain + "." + dom.DomainName
+// 		rep, err := ali.client.DescribeSubDomainRecords(existReq)
+// 		if err != nil {
+// 			log.Println(err)
+// 		}
+// 		if rep.TotalCount > 0 {
+// 			// 更新
+// 			if rep.DomainRecords.Record[0].Value != ipAddr {
+// 				request := alidnssdk.CreateUpdateDomainRecordRequest()
+// 				request.Scheme = "https"
+// 				request.Value = ipAddr
+// 				request.Type = typ
+// 				request.RR = dom.SubDomain
+// 				request.RecordId = rep.DomainRecords.Record[0].RecordId
+
+// 				_, err = ali.client.UpdateDomainRecord(request)
+// 				if err != nil {
+// 					log.Println("更新ipv4记录错误！ Domain: ", dom, " ip: ", ipAddr, "ERROR")
+// 				} else {
+// 					log.Println("更新ipv4记录成功！ Domain: ", dom, " ip: ", ipAddr)
+// 				}
+// 				if rep.TotalCount > 1 {
+// 					log.Println(dom, "存在多条记录，只会更新第一条")
+// 				}
+// 			} else {
+// 				// 新增
+// 				request := alidnssdk.CreateAddDomainRecordRequest()
+// 				request.Scheme = "https"
+// 				request.Value = ipAddr
+// 				request.Type = typ
+// 				request.RR = dom.SubDomain
+// 				request.DomainName = dom.DomainName
+
+// 				_, err = ali.client.AddDomainRecord(request)
+// 				if err != nil {
+// 					log.Println("添加", typeName, " 错误，Domain: ", dom, " ip: ", ipAddr)
+// 				} else {
+// 					log.Println("添加", typeName, " 成功，Domain: ", dom, " ip: ", ipAddr)
+
+//					}
+//				}
+//			}
+//		}
+//	}
 package dns
 
 import (
@@ -5,11 +127,9 @@ import (
 	"myddns/config"
 
 	alidnssdk "github.com/aliyun/alibaba-cloud-sdk-go/services/alidns"
-	// "github.com/aliyun/alibaba-cloud-sdk-go/services/alidns"
-	// 库后期将被弃用，暂时保留
 )
 
-// 阿里云DNS实现
+// Alidns 阿里云dns实现
 type Alidns struct {
 	client *alidnssdk.Client
 	Domains
@@ -19,19 +139,18 @@ type Alidns struct {
 func (ali *Alidns) Init(conf *config.Config) {
 	client, err := alidnssdk.NewClientWithAccessKey("cn-hangzhou", conf.DNS.ID, conf.DNS.Secret)
 	if err != nil {
-		log.Println("Ali dns 链接失败")
-		// return false, false
+		log.Println("Alidns链接失败")
 	}
 	ali.client = client
 
-	// Ipv4
+	// IPV4
 	ipv4Addr := conf.GetIpv4Addr()
 	if ipv4Addr != "" {
 		ali.Ipv4Addr = ipv4Addr
 		ali.Ipv4Domains = ParseDomain(conf.Ipv4.Domains)
 	}
 
-	// Ipv6
+	// IPV6
 	ipv6Addr := conf.GetIpv6Addr()
 	if ipv6Addr != "" {
 		ali.Ipv6Addr = ipv6Addr
@@ -40,22 +159,17 @@ func (ali *Alidns) Init(conf *config.Config) {
 
 }
 
-/* // AddRecord 添加记录
-func (alidns *Alidns) AddRecord(conf *config.Config) (ipv4 bool, ipv6 bool) {
-
-	ipv4Stat := addIpv4Record(client, conf)
-	ipv6Stat := addIpv6Record(client, conf)
-	return ipv4Stat, ipv6Stat
-} */
-
+// AddUpdateIpv4DomainRecords 添加或更新IPV4记录
 func (ali *Alidns) AddUpdateIpv4DomainRecords() {
-	ali.AddUpdateIpvDomainRecords("A")
-}
-func (ali *Alidns) AddUpdateIpv6DomainRecords() {
-	ali.AddUpdateIpvDomainRecords("AAAA")
+	ali.addUpdateDomainRecords("A")
 }
 
-func (ali *Alidns) AddUpdateIpvDomainRecords(typ string) {
+// AddUpdateIpv6DomainRecords 添加或更新IPV4记录
+func (ali *Alidns) AddUpdateIpv6DomainRecords() {
+	ali.addUpdateDomainRecords("AAAA")
+}
+
+func (ali *Alidns) addUpdateDomainRecords(typ string) {
 	typeName := "ipv4"
 	ipAddr := ali.Ipv4Addr
 	domains := ali.Ipv4Domains
@@ -64,11 +178,12 @@ func (ali *Alidns) AddUpdateIpvDomainRecords(typ string) {
 		ipAddr = ali.Ipv6Addr
 		domains = ali.Ipv6Domains
 	}
+
 	if ipAddr == "" {
 		return
 	}
 
-	existReq := alidnssdk.CreateDeleteSubDomainRecordsRequest()
+	existReq := alidnssdk.CreateDescribeSubDomainRecordsRequest()
 	existReq.Type = typ
 
 	for _, dom := range domains {
@@ -78,7 +193,7 @@ func (ali *Alidns) AddUpdateIpvDomainRecords(typ string) {
 			log.Println(err)
 		}
 		if rep.TotalCount > 0 {
-			// 更新
+			// Update
 			if rep.DomainRecords.Record[0].Value != ipAddr {
 				request := alidnssdk.CreateUpdateDomainRecordRequest()
 				request.Scheme = "https"
@@ -87,31 +202,32 @@ func (ali *Alidns) AddUpdateIpvDomainRecords(typ string) {
 				request.RR = dom.SubDomain
 				request.RecordId = rep.DomainRecords.Record[0].RecordId
 
-				_, err := ali.client.UpdateDomainRecord(request)
+				_, err = ali.client.UpdateDomainRecord(request)
 				if err != nil {
-					log.Println("更新ipv4记录错误！ Domain: ", dom, " ip: ", ipAddr, "ERROR")
+					log.Println("Update ipv4 error! Domain:", dom, " IP:", ipAddr, " ERROR: ", err.Error())
 				} else {
-					log.Println("更新ipv4记录成功！ Domain: ", dom, " ip: ", ipAddr)
+					log.Println("Update ipv4 success! Domain:", dom, " IP:", ipAddr)
 				}
 				if rep.TotalCount > 1 {
-					log.Println(dom, "存在多条记录，只会更新第一条")
+					log.Println(dom, "records more than 2, We just update the first!")
 				}
 			} else {
-				// 新增
-				request := alidnssdk.CreateAddDomainRecordRequest()
-				request.Scheme = "https"
-				request.Value = ipAddr
-				request.Type = typ
-				request.RR = dom.SubDomain
-				request.DomainName = dom.DomainName
+				log.Println(typeName, "address is the same！Domain:", dom, " IP:", ipAddr)
+			}
+		} else {
+			// Add
+			request := alidnssdk.CreateAddDomainRecordRequest()
+			request.Scheme = "https"
+			request.Value = ipAddr
+			request.Type = typ
+			request.RR = dom.SubDomain
+			request.DomainName = dom.DomainName
 
-				_, err := ali.client.AddDomainRecord(request)
-				if err != nil {
-					log.Println("添加", typeName, " 错误，Domain: ", dom, " ip: ", ipAddr)
-				} else {
-					log.Println("添加", typeName, " 成功，Domain: ", dom, " ip: ", ipAddr)
-
-				}
+			_, err = ali.client.AddDomainRecord(request)
+			if err != nil {
+				log.Println("Add ", typeName, " error! Domain: ", dom, " IP: ", ipAddr, " ERROR: ", err.Error())
+			} else {
+				log.Println("Add ", typeName, " success! Domain: ", dom, " IP: ", ipAddr)
 			}
 		}
 	}

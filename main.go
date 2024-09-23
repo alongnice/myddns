@@ -1,6 +1,7 @@
 package main
 
 import (
+	"myddns/dns"
 	"myddns/static"
 	"myddns/util"
 	"myddns/web"
@@ -14,11 +15,8 @@ const port = "12138"
 
 func main() {
 	// 启动静态文件服务
-	// http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(static.AssetFile())))
-	// http.Handle("/favicon.ico", http.StripPrefix("/", http.FileServer(http.Dir("static"))))
 	http.Handle("/favicon.ico", http.StripPrefix("/", http.FileServer(static.AssetFile())))
-
 
 	http.HandleFunc("/", web.Writing)
 	http.HandleFunc("/save", web.Save)
@@ -26,6 +24,9 @@ func main() {
 	// 新建协程,打开浏览器
 	go util.OpenExplore("http://127.0.0.1:" + port)
 	log.Println(port, " 端口启动", "...")
+
+	// 定时运行
+	go dns.RunTimer()
 
 	err := http.ListenAndServe(":"+port, nil)
 	if err != nil {
