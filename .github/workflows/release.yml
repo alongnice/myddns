@@ -30,7 +30,7 @@ jobs:
       if: startsWith(github.ref, 'refs/tags/')
       with:
         version: latest
-        args: release --rm-dist
+        args: release
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       # 运行 run GoReleaser 这是一个自动化go项目发布工具
