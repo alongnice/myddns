@@ -67,25 +67,29 @@ func RunTimer() {
 func ParseDomain(domainArr []string) (domains []*Domain) {
 	// 解析域名
 	for _, domainStr := range domainArr {
-		// 遍历域名数组
-		domain := &Domain{}
-		// 构建一个域名实体对象
-		sp := strings.Split(domainStr, ".")
-		// 切片分割，进行异常判断
-		length := len(sp)
-		if length <= 1 { // 错误情况
-			log.Println(domainStr, "域名不正确")
-			continue
-		} else if length == 2 { //单个域名情况
-			domain.DomainName = domainStr
-		} else { // >=3
-			domain.DomainName = sp[length-2] + "." + sp[length-1]
-			// 子域名
-			domain.SubDomain = domainStr[:len(domainStr)-len(domain.DomainName)-1]
-			// 判断是否可用
+		domainStr = strings.Trim(domainStr, " ")
+		// 去除空格
+		if domainStr != "" {
+			// 遍历域名数组
+			domain := &Domain{}
+			// 构建一个域名实体对象
+			sp := strings.Split(domainStr, ".")
+			// 切片分割，进行异常判断
+			length := len(sp)
+			if length <= 1 { // 错误情况
+				log.Println(domainStr, "域名不正确")
+				continue
+			} else if length == 2 { //单个域名情况
+				domain.DomainName = domainStr
+			} else { // >=3
+				domain.DomainName = sp[length-2] + "." + sp[length-1]
+				// 子域名
+				domain.SubDomain = domainStr[:len(domainStr)-len(domain.DomainName)-1]
+				// 判断是否可用
+			}
+			domains = append(domains, domain)
+			// 添加到域名实体数组
 		}
-		domains = append(domains, domain)
-		// 添加到域名实体数组
 	}
 	return
 }
