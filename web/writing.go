@@ -46,9 +46,14 @@ func Writing(writer http.ResponseWriter, request *http.Request) {
 	// 默认值
 	if conf.Ipv4.URL == "" {
 		conf.Ipv4.URL = "http://api-ipv4.ip.sb/ip"
+		conf.Ipv4.Enable = true
 	}
 	if conf.Ipv6.URL == "" {
 		conf.Ipv6.URL = "http://api-ipv4.ip.sb/ip"
 	}
+	if conf.DNS.Name == "" {
+		conf.DNS.Name = "alidns"
+	}
+
 	tmpl.Execute(writer, conf)
 }

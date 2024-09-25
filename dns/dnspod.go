@@ -1,0 +1,192 @@
+package dns
+
+import (
+	"encoding/json"
+	"io/ioutil"
+	"log"
+	"myddns/config"
+	"net/http"
+	"net/url"
+)
+
+const (
+	recordListAPI   string = "https://dnsapi.cn/Record.List"
+	recordModifyURL string = "https://dnsapi.cn/Record.Modify"
+	recordCreateAPi string = "https://dnsapi.cn/Record.Create"
+)
+
+// Dnspod 腾讯云DNS实现
+type Dnspod struct {
+	DNSConfig config.DNSConfig
+	Domains
+}
+
+// 腾讯云返回状态码
+type DnspodStatus struct {
+	Status struct {
+		Code    string
+		Message string
+	}
+}
+
+// 腾讯云返回的记录列表
+type DnspodRecordListResp struct {
+	DnspodStatus
+	Records []struct {
+		ID     string
+		Name   string
+		Type   string
+		Value  string
+		Enable string
+	}
+}
+
+// Init 初始化
+func (dnspod *Dnspod) Init(conf *config.Config) {
+	dnspod.DNSConfig = conf.DNS
+	dnspod.Domains.ParseDomain(conf)
+}
+
+// 添加或者更新IPv4记录
+func (dnspod *Dnspod) AddUpdateIpv4DomainRecords() {
+	dnspod.AddUpdateIpvDomainRecords("A")
+}
+
+// 添加或者更新IPv6记录
+func (dnspod *Dnspod) AddUpdateIpv6DomainRecords() {
+	dnspod.AddUpdateIpvDomainRecords("AAAA")
+}
+
+func (dnspod *Dnspod) AddUpdateIpvDomainRecords(recordType string) {
+	ipAddr := dnspod.Ipv4Addr
+	domains := dnspod.Ipv4Domains
+	if recordType == "AAAA" {
+		ipAddr = dnspod.Ipv6Addr
+		domains = dnspod.Ipv6Domains
+	}
+
+	if ipAddr == "" {
+		return
+	}
+
+	for _, domain := range domains {
+		result, err := dnspod.getRecordList(domain, recordType)
+		if err != nil {
+			return
+		}
+		if len(result.Records) > 0 {
+			// update
+			dnspod.modify(result, domain, recordType, ipAddr)
+		} else {
+			// add
+			dnspod.create(result, domain, recordType, ipAddr)
+		}
+	}
+}
+
+// add
+func (dnspod *Dnspod) create(result DnspodRecordListResp, domain *Domain, recordType, ipAddr string) {
+	status, err := dnspod.commonRequest(
+		recordCreateAPi,
+		url.Values{
+			"login_token": {dnspod.DNSConfig.ID + "," + dnspod.DNSConfig.Secret},
+			"domain":      {domain.DomainName},
+			"subDomain":   {domain.SubDomain},
+			"record_type": {"默认"},
+			"value":       {ipAddr},
+		},
+		domain,
+	)
+	if err != nil {
+		if status.Status.Code == "1" {
+			log.Println("新增域名解析", domain, "成功， IP 是", ipAddr)
+		} else {
+			log.Println("新增域名解析", domain, "失败， IP 是", ipAddr, "error message is", status.Status.Message)
+		}
+	}
+}
+
+// update
+func (dnspod *Dnspod) modify(result DnspodRecordListResp, domain *Domain, recordType, ipAddr string) {
+	for _, record := range result.Records {
+		// 相同的无需操作
+		if record.Value == ipAddr {
+			log.Println("IP地址未发生变化，无需操作！", domain, "IP:", ipAddr)
+			continue
+		}
+
+		status, err := dnspod.commonRequest(
+			recordModifyURL,
+			url.Values{
+				"login_token": {dnspod.DNSConfig.ID + "," + dnspod.DNSConfig.Secret},
+				"domain":      {domain.DomainName},
+				// "subDomain":   {domain.GetSubDomain()},
+				"subDomain":   {domain.SubDomain},
+				"record_type": {recordType},
+				"record_line": {"默认"},
+				"record_id":   {record.ID},
+				"value":       {ipAddr},
+				"format":      {"json"},
+			},
+			domain,
+		)
+		if err == nil && status.Status.Code == "1" {
+			log.Printf("更新域名 %s 成功,ip 是 %s", domain, ipAddr)
+		} else {
+			log.Printf("更新域名 %s 失败,ip 是 %s, error message is %s", domain, ipAddr, status.Status.Message)
+		}
+	}
+}
+
+// common
+func (Dnspod *Dnspod) commonRequest(apiAddr string, values url.Values, domain *Domain) (status DnspodStatus, err error) {
+	resp, err := http.PostForm(
+		apiAddr,
+		values,
+	)
+
+	if err != nil {
+		log.Printf("请求接口 %s 失败! ERROR is %s", apiAddr, err)
+		return
+	}
+
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Printf("读取接口 %s 返回值失败! ERROR is %s", apiAddr, err)
+		return
+	}
+	err = json.Unmarshal(body, &status)
+	if err != nil {
+		log.Printf("解析接口 %s 返回值失败! ERROR is %s", apiAddr, err)
+		return
+	}
+	return
+}
+
+func (dnspod *Dnspod) getRecordList(domain *Domain, typ string) (result DnspodRecordListResp, err error) {
+	resp, err := http.PostForm(
+		recordListAPI,
+		url.Values{
+			"login_token": {dnspod.DNSConfig.ID + "," + dnspod.DNSConfig.Secret},
+			"domain":      {domain.DomainName},
+			"subDomain":   {domain.SubDomain},
+			"record_type": {typ},
+		},
+	)
+	if err != nil {
+		log.Printf("请求接口 %s 失败! ERROR : %s", recordCreateAPi, err)
+	} else {
+		defer resp.Body.Close()
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			log.Printf("请求接口 %s 失败! ERROR : %s", recordCreateAPi, err)
+		}
+		err = json.Unmarshal(body, &result)
+
+		if err != nil {
+			log.Printf("请求接口 %s 解析json失败! ERROR : %s", recordCreateAPi, err)
+		}
+	}
+	return
+}

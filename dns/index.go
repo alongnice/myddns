@@ -37,6 +37,23 @@ func (d Domain) String() string {
 	return d.SubDomain + "." + d.DomainName
 }
 
+// // 获取全部子域名
+// func (d Domain) GetFullDomain() []string {
+// 	if d.SubDomain != "" {
+// 		return d.SubDomain + "." + d.DomainName
+// 	}
+// 	return "@" + "." + d.DomainName
+// }
+
+// // GetSubDomain 获得子域名，为空返回@
+// // 阿里云，dnspod需要
+// func (d Domain) GetSubDomain() string {
+// 	if d.SubDomain != "" {
+// 		return d.SubDomain
+// 	}
+// 	return "@"
+// }
+
 // runOnce
 func RunOnce() {
 	conf := &config.Config{}
@@ -49,6 +66,11 @@ func RunOnce() {
 	switch conf.DNS.Name {
 	case "alidns":
 		dnsSelected = &Alidns{}
+	case "dnspod":
+		dnsSelected = &Dnspod{}
+	default:
+		dnsSelected = &Alidns{}
+
 	}
 	dnsSelected.Init(conf)
 	dnsSelected.AddUpdateIpv4DomainRecords()
@@ -64,7 +86,23 @@ func RunTimer() {
 }
 
 // ParseDomain 解析域名,传入域名数组 返回域名实体数组
-func ParseDomain(domainArr []string) (domains []*Domain) {
+func (domains *Domains) ParseDomain(conf *config.Config) {
+	// ipv4
+	ipv4Addr := conf.GetIpv4Addr()
+	if ipv4Addr != "" {
+		domains.Ipv4Addr = ipv4Addr
+		domains.Ipv4Domains = ParseDomainInnerchan(conf.Ipv4.Domains)
+	}
+
+	// ipv6
+	ipv6Addr := conf.GetIpv6Addr()
+	if ipv6Addr != "" {
+		domains.Ipv6Addr = ipv6Addr
+		domains.Ipv6Domains = ParseDomainInnerchan(conf.Ipv6.Domains)
+	}
+}
+
+func ParseDomainInnerchan(domainArr []string) (domains []*Domain) {
 	// 解析域名
 	for _, domainStr := range domainArr {
 		domainStr = strings.Trim(domainStr, " ")

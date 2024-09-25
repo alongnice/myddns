@@ -28,42 +28,25 @@ func (ali *Alidns) Init(conf *config.Config) {
 	}
 	ali.client = client
 
-	// Ipv4
-	ipv4Addr := conf.GetIpv4Addr()
-	if ipv4Addr != "" {
-		ali.Ipv4Addr = ipv4Addr
-		ali.Ipv4Domains = ParseDomain(conf.Ipv4.Domains)
-	}
-
-	// Ipv6
-	ipv6Addr := conf.GetIpv6Addr()
-	if ipv6Addr != "" {
-		ali.Ipv6Addr = ipv6Addr
-		ali.Ipv6Domains = ParseDomain(conf.Ipv6.Domains)
-	}
-
+	ali.Domains.ParseDomain(conf)
+	// 将原本解析域名的操作向下传递
 }
 
-/* // AddRecord 添加记录
-func (alidns *Alidns) AddRecord(conf *config.Config) (ipv4 bool, ipv6 bool) {
-
-	ipv4Stat := addIpv4Record(client, conf)
-	ipv6Stat := addIpv6Record(client, conf)
-	return ipv4Stat, ipv6Stat
-} */
-
+// 添加或者更新IPv4记录
 func (ali *Alidns) AddUpdateIpv4DomainRecords() {
 	ali.AddUpdateIpvDomainRecords("A")
 }
+
+// 添加或者更新IPv6记录
 func (ali *Alidns) AddUpdateIpv6DomainRecords() {
 	ali.AddUpdateIpvDomainRecords("AAAA")
 }
 
-func (ali *Alidns) AddUpdateIpvDomainRecords(typ string) {
+func (ali *Alidns) AddUpdateIpvDomainRecords(recordType string) {
 	typeName := "ipv4"
 	ipAddr := ali.Ipv4Addr
 	domains := ali.Ipv4Domains
-	if typ == "AAAA" {
+	if recordType == "AAAA" {
 		typeName = "ipv6"
 		ipAddr = ali.Ipv6Addr
 		domains = ali.Ipv6Domains
@@ -73,49 +56,53 @@ func (ali *Alidns) AddUpdateIpvDomainRecords(typ string) {
 	}
 
 	existReq := alidnssdk.CreateDescribeSubDomainRecordsRequest()
-	existReq.Type = typ
+	existReq.Type = recordType
 
-	for _, dom := range domains {
-		existReq.SubDomain = dom.SubDomain + "." + dom.DomainName
+	for _, domain := range domains {
+		existReq.SubDomain = domain.SubDomain + "." + domain.DomainName
 		rep, err := ali.client.DescribeSubDomainRecords(existReq)
 		if err != nil {
 			log.Println(err)
 		}
 		if rep.TotalCount > 0 {
 			// 更新
-			if rep.DomainRecords.Record[0].Value != ipAddr {
+			for _, record := range rep.DomainRecords.Record {
+				if record.Value == ipAddr {
+					log.Printf("当前域名 %s 对应IP %s 未发生变化，无需操作。", domain, ipAddr)
+					continue
+				}
 				request := alidnssdk.CreateUpdateDomainRecordRequest()
 				request.Scheme = "https"
 				request.Value = ipAddr
-				request.Type = typ
-				request.RR = dom.SubDomain
-				request.RecordId = rep.DomainRecords.Record[0].RecordId
+				request.Type = recordType
+				request.RR = domain.SubDomain
+				request.RecordId = record.RecordId
 
-				_, err = ali.client.UpdateDomainRecord(request)
-				if err != nil {
-					log.Println("更新ipv4记录错误！", typeName, " Domain: ", dom, " ip: ", ipAddr, "ERROR")
+				updateResp, err := ali.client.UpdateDomainRecord(request)
+				if err != nil || !updateResp.BaseResponse.IsSuccess() {
+					log.Println("更新ipv4记录错误！", typeName, " Domain: ", domain, " ip: ", ipAddr, "ERROR", err, "Response is", updateResp.GetHttpContentString())
 				} else {
-					log.Println("更新ipv4记录成功！", typeName, " Domain: ", dom, " ip: ", ipAddr)
+					log.Println("更新ipv4记录成功！", typeName, " Domain: ", domain, " ip: ", ipAddr)
 				}
-				if rep.TotalCount > 1 {
-					log.Println(typeName, dom, "存在多条记录，只会更新第一条")
-				}
+				// if rep.TotalCount > 1 {
+				// 	log.Println(typeName, dom, "存在多条记录，只会更新第一条")
+				// }
+			}
+		} else {
+			// 新增
+			request := alidnssdk.CreateAddDomainRecordRequest()
+			request.Scheme = "https"
+			request.Value = ipAddr
+			request.Type = recordType
+			request.RR = domain.SubDomain
+			request.DomainName = domain.DomainName
+
+			createResp, err := ali.client.AddDomainRecord(request)
+			if err != nil {
+				log.Println("添加", typeName, " 错误，Domain: ", domain, " ip: ", ipAddr, "error is ", err, "createResp is ", createResp.GetHttpContentString())
 			} else {
-				// 新增
-				request := alidnssdk.CreateAddDomainRecordRequest()
-				request.Scheme = "https"
-				request.Value = ipAddr
-				request.Type = typ
-				request.RR = dom.SubDomain
-				request.DomainName = dom.DomainName
+				log.Println("添加", typeName, " 成功，Domain: ", domain, " ip: ", ipAddr)
 
-				_, err = ali.client.AddDomainRecord(request)
-				if err != nil {
-					log.Println("添加", typeName, " 错误，Domain: ", dom, " ip: ", ipAddr)
-				} else {
-					log.Println("添加", typeName, " 成功，Domain: ", dom, " ip: ", ipAddr)
-
-				}
 			}
 		}
 	}
