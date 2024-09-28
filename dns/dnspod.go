@@ -1,10 +1,9 @@
 package dns
 
 import (
-	"encoding/json"
-	"io/ioutil"
 	"log"
 	"myddns/config"
+	"myddns/util"
 	"net/http"
 	"net/url"
 )
@@ -97,12 +96,10 @@ func (dnspod *Dnspod) create(result DnspodRecordListResp, domain *Domain, record
 		},
 		domain,
 	)
-	if err != nil {
-		if status.Status.Code == "1" {
-			log.Println("新增域名解析", domain, "成功， IP 是", ipAddr)
-		} else {
-			log.Println("新增域名解析", domain, "失败， IP 是", ipAddr, "error message is", status.Status.Message)
-		}
+	if err == nil && status.Status.Code == "1" {
+		log.Println("新增域名解析", domain, "成功， IP 是", ipAddr)
+	} else {
+		log.Println("新增域名解析", domain, "失败， IP 是", ipAddr, "error message is", status.Status.Message)
 	}
 }
 
@@ -144,23 +141,8 @@ func (Dnspod *Dnspod) commonRequest(apiAddr string, values url.Values, domain *D
 		apiAddr,
 		values,
 	)
+	util.GetHTTPResponse(resp, apiAddr, err, &status)
 
-	if err != nil {
-		log.Printf("请求接口 %s 失败! ERROR is %s", apiAddr, err)
-		return
-	}
-
-	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		log.Printf("读取接口 %s 返回值失败! ERROR is %s", apiAddr, err)
-		return
-	}
-	err = json.Unmarshal(body, &status)
-	if err != nil {
-		log.Printf("解析接口 %s 返回值失败! ERROR is %s", apiAddr, err)
-		return
-	}
 	return
 }
 
@@ -174,19 +156,7 @@ func (dnspod *Dnspod) getRecordList(domain *Domain, typ string) (result DnspodRe
 			"record_type": {typ},
 		},
 	)
-	if err != nil {
-		log.Printf("请求接口 %s 失败! ERROR : %s", recordCreateAPi, err)
-	} else {
-		defer resp.Body.Close()
-		body, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			log.Printf("请求接口 %s 失败! ERROR : %s", recordCreateAPi, err)
-		}
-		err = json.Unmarshal(body, &result)
+	util.GetHTTPResponse(resp, recordListAPI, err, &result)
 
-		if err != nil {
-			log.Printf("请求接口 %s 解析json失败! ERROR : %s", recordCreateAPi, err)
-		}
-	}
 	return
 }

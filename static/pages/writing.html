@@ -5,7 +5,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="author" content="jie">
-  <title>DDNS-GO</title>
+  <title>MYDDNS</title>
   <!-- Bootstrap CSS -->
   <link rel="stylesheet" href="/static/bootstrap.min.css">
   <link rel="stylesheet" href="/static/common.css">
@@ -55,14 +55,14 @@
                 </div>
 
 
-                <!-- <div class="form-check form-check-inline">
-                  <input class="form-check-input" type="radio" name="DnsName" id="cloudflare" value="cloudflare" onclick="cloudflareCheckedFun()">
+                <div class="form-check form-check-inline">
+                  <input class="form-check-input" type="radio" name="DnsName" id="cloudflare" value="cloudflare" onclick="cloudflareCheckedFun()" {{if eq $.DNS.Name "cloudflare"}}checked{{end}}>
                   <label class="form-check-label" for="cloudflare"> 
                     Cloudflare
                   </label>
-                </div> -->
+                </div>
               </div>
-           
+
               <div class="form-group">
                 <label for="DnsID" id="dnsIdLabel">ID</label>
                 <input class="form-control" name="DnsID" id="DnsID" value="{{.DNS.ID}}">
@@ -149,10 +149,33 @@
       }
     }
     getQueryVariable()
+    var beforeDnsID=""
 
-    function alidnsCheckedFun(){}
-    function alidnsCheckedFun(){}    
-    function cloudflareCheckedFun(){}
+    function alidnsCheckedFun(){
+      document.getElementByID("DnsID").disabled=false
+      if (beforeDnsID)
+        document.getElementById("DnsID").value = beforeDnsID
+
+      document.getElementById("dnsIdLabel").innerHTML = "AccessKey ID"
+      document.getElementById("dnsSecretLabel").innerHTML = "AccessKey Secret"
+    }
+
+    function dnspodCheckedFun(){
+      document.getElementByID("DnsID").disabled=false
+      if (beforeDnsID)
+        document.getElementById("DnsID").value = beforeDnsID
+  
+      document.getElementById("dnsIdLabel").innerHTML = "ID"
+      document.getElementById("dnsSecretLabel").innerHTML = "Token"
+      
+    }    
+    function cloudflareCheckedFun(){
+      document.getElementByID("dnsIdLabel").disabled=false
+      beforeDnsID = document.getElementById("DnsID").value
+      document.getElementById("DnsID").disabled = true
+      document.getElementById("DnIDs").value = ""
+      document.getElementById("DnsSecret").value = "token"
+    }
 
     var dnsName = '{{$.DNS.Name}}'
 

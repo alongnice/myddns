@@ -34,7 +34,12 @@ type Domain struct {
 
 // 创建域名实体对象的构造（字符串处理）
 func (d Domain) String() string {
-	return d.SubDomain + "." + d.DomainName
+	if d.SubDomain != "" {
+		return d.SubDomain + "." + d.DomainName
+	} else {
+		return d.DomainName
+	}
+
 }
 
 // // 获取全部子域名
@@ -68,6 +73,8 @@ func RunOnce() {
 		dnsSelected = &Alidns{}
 	case "dnspod":
 		dnsSelected = &Dnspod{}
+	case "cloudflare":
+		dnsSelected = &Cloudflare{}
 	default:
 		dnsSelected = &Alidns{}
 
