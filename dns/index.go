@@ -36,9 +36,8 @@ type Domain struct {
 func (d Domain) String() string {
 	if d.SubDomain != "" {
 		return d.SubDomain + "." + d.DomainName
-	} else {
-		return d.DomainName
 	}
+	return d.DomainName
 
 }
 

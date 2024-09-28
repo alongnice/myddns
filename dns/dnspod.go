@@ -73,6 +73,9 @@ func (dnspod *Dnspod) AddUpdateIpvDomainRecords(recordType string) {
 		if err != nil {
 			return
 		}
+
+		log.Println(domain.SubDomain)
+		log.Println(domain.DomainName)
 		if len(result.Records) > 0 {
 			// update
 			dnspod.modify(result, domain, recordType, ipAddr)
@@ -90,9 +93,10 @@ func (dnspod *Dnspod) create(result DnspodRecordListResp, domain *Domain, record
 		url.Values{
 			"login_token": {dnspod.DNSConfig.ID + "," + dnspod.DNSConfig.Secret},
 			"domain":      {domain.DomainName},
-			"subDomain":   {domain.SubDomain},
+			"sub_domain":  {domain.SubDomain},
 			"record_type": {"默认"},
 			"value":       {ipAddr},
+			"format":      {"json"},
 		},
 		domain,
 	)
@@ -118,7 +122,7 @@ func (dnspod *Dnspod) modify(result DnspodRecordListResp, domain *Domain, record
 				"login_token": {dnspod.DNSConfig.ID + "," + dnspod.DNSConfig.Secret},
 				"domain":      {domain.DomainName},
 				// "subDomain":   {domain.GetSubDomain()},
-				"subDomain":   {domain.SubDomain},
+				"sub_domain":  {domain.SubDomain},
 				"record_type": {recordType},
 				"record_line": {"默认"},
 				"record_id":   {record.ID},
@@ -146,15 +150,30 @@ func (Dnspod *Dnspod) commonRequest(apiAddr string, values url.Values, domain *D
 	return
 }
 
+// 获得域名记录
 func (dnspod *Dnspod) getRecordList(domain *Domain, typ string) (result DnspodRecordListResp, err error) {
+	values := url.Values{
+		"login_token": {dnspod.DNSConfig.ID + "," + dnspod.DNSConfig.Secret},
+		"domain":      {domain.DomainName},
+		"record_type": {typ},
+		"format":      {"json"},
+	}
+
+	if domain.SubDomain != "" {
+		values.Add("sub_domain", domain.SubDomain)
+	} else {
+		values.Add("Sub_domain", "@")
+	}
+
 	resp, err := http.PostForm(
 		recordListAPI,
-		url.Values{
-			"login_token": {dnspod.DNSConfig.ID + "," + dnspod.DNSConfig.Secret},
-			"domain":      {domain.DomainName},
-			"subDomain":   {domain.SubDomain},
-			"record_type": {typ},
-		},
+		values,
+		// url.Values{
+		// 	"login_token": {dnspod.DNSConfig.ID + "," + dnspod.DNSConfig.Secret},
+		// 	"domain":      {domain.DomainName},
+		// 	"sub_domain":  {domain.SubDomain},
+		// 	"record_type": {typ},
+		// },
 	)
 	util.GetHTTPResponse(resp, recordListAPI, err, &result)
 
