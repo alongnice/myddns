@@ -16,10 +16,23 @@ func Save(writer http.ResponseWriter, request *http.Request) {
 	conf := &config.Config{}
 	// 创建一个配置变量
 
+	conf.InitConfigFromFile()
+	idNew := request.FormValue("DnsID")
+	secretNew := request.FormValue("DnsSecret")
+
+	idHide, secretHide := getHideSecret(conf)
+
+	if idNew != idHide{
+		conf.DNS.ID = idNew
+	}
+	if secretNew != secretHide{
+		conf.DNS.Secret = secretNew
+	}
+
+
 	conf.DNS.Name = request.FormValue("DnsName")
 	// 从request中获取值，赋值给配置变量
-	conf.DNS.ID = request.FormValue("DnsID")
-	conf.DNS.Secret = request.FormValue("DnsSecret")
+
 
 	conf.Ipv4.Enable = request.FormValue("Ipv4Enable") == "on"
 	conf.Ipv4.URL = request.FormValue("Ipv4Url")

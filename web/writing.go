@@ -2,15 +2,12 @@ package web
 
 import (
 	"fmt"
-	"io/ioutil"
 	"log"
 	"myddns/config"
 	"myddns/util"
 	"net/http"
-	"os"
 	"text/template"
-
-	"gopkg.in/yaml.v2"
+	"strings"
 )
 
 func Writing(writer http.ResponseWriter, request *http.Request) {
@@ -27,20 +24,17 @@ func Writing(writer http.ResponseWriter, request *http.Request) {
 	}
 
 	conf := &config.Config{}
+	err = conf.InitConfigFromFile()
 
-	// 解析文件
-	var configFile string = util.GetConfigFromFile()
-	_, err = os.Stat(configFile)
 	if err == nil {
-		// 如果不是空
-		byt, err := ioutil.ReadFile(configFile)
-		if err == nil {
-			err = yaml.Unmarshal(byt, conf)
-			if err == nil {
-				tmpl.Execute(writer, conf)
-				return
-			}
-		}
+		// 隐藏真实的ID,Secret
+		idHide, secretHide := getHideSecret(conf)
+		conf.DNS.ID = idHide
+		conf.DNS.Secret = secretHide
+
+		tmpl.Execute(writer, conf)
+		return 
+
 	}
 
 	// 默认值
@@ -56,4 +50,17 @@ func Writing(writer http.ResponseWriter, request *http.Request) {
 	}
 
 	tmpl.Execute(writer, conf)
+}
+
+
+// 显示数目
+const displayCount = 3
+func getHideSecret(conf *config.Config) (idHide string, secretHide string) {
+	if len(conf.DNS.Secret) > displayCount{
+		idHide = conf.DNS.ID[:displayCount] + strings.Repeat("*", len(conf.DNS.ID) - displayCount)
+	}
+	if len(conf.DNS.Secret) > displayCount{
+	    secretHide = conf.DNS.Secret[:displayCount] + strings.Repeat("*", len(conf.DNS.Secret) - displayCount)
+	}
+	return 
 }

@@ -93,7 +93,7 @@ func (dnspod *Dnspod) create(result DnspodRecordListResp, domain *Domain, record
 		url.Values{
 			"login_token": {dnspod.DNSConfig.ID + "," + dnspod.DNSConfig.Secret},
 			"domain":      {domain.DomainName},
-			"sub_domain":  {domain.SubDomain},
+			"sub_domain":  {domain.GetSubDomain()},
 			"record_type": {"默认"},
 			"value":       {ipAddr},
 			"format":      {"json"},
@@ -121,8 +121,7 @@ func (dnspod *Dnspod) modify(result DnspodRecordListResp, domain *Domain, record
 			url.Values{
 				"login_token": {dnspod.DNSConfig.ID + "," + dnspod.DNSConfig.Secret},
 				"domain":      {domain.DomainName},
-				// "subDomain":   {domain.GetSubDomain()},
-				"sub_domain":  {domain.SubDomain},
+				"subDomain":   {domain.GetSubDomain()},
 				"record_type": {recordType},
 				"record_line": {"默认"},
 				"record_id":   {record.ID},
@@ -145,7 +144,7 @@ func (Dnspod *Dnspod) commonRequest(apiAddr string, values url.Values, domain *D
 		apiAddr,
 		values,
 	)
-	util.GetHTTPResponse(resp, apiAddr, err, &status)
+	err = util.GetHTTPResponse(resp, apiAddr, err, &status)
 
 	return
 }
@@ -156,14 +155,15 @@ func (dnspod *Dnspod) getRecordList(domain *Domain, typ string) (result DnspodRe
 		"login_token": {dnspod.DNSConfig.ID + "," + dnspod.DNSConfig.Secret},
 		"domain":      {domain.DomainName},
 		"record_type": {typ},
+		"sub_domain":{domain.GetSubDomain()},
 		"format":      {"json"},
 	}
 
-	if domain.SubDomain != "" {
-		values.Add("sub_domain", domain.SubDomain)
-	} else {
-		values.Add("Sub_domain", "@")
-	}
+	// if domain.SubDomain != "" {
+	// 	values.Add("sub_domain", domain.SubDomain)
+	// } else {
+	// 	values.Add("Sub_domain", "@")
+	// }
 
 	resp, err := http.PostForm(
 		recordListAPI,
@@ -175,7 +175,7 @@ func (dnspod *Dnspod) getRecordList(domain *Domain, typ string) (result DnspodRe
 		// 	"record_type": {typ},
 		// },
 	)
-	util.GetHTTPResponse(resp, recordListAPI, err, &result)
+	err = util.GetHTTPResponse(resp, recordListAPI, err, &result)
 
 	return
 }
