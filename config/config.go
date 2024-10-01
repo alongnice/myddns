@@ -52,7 +52,7 @@ func (conf *Config) InitConfigFromFile() error {
 		log.Println("config.yaml 读取失败")
 		return err
 	}
-	log.Panicln("config.yaml 读取成功")
+	log.Println("config.yaml 读取成功")
 	// 解析配置
 	yaml.Unmarshal(byt, conf)
 	// 对byt进行操作，切片解码给到conf
