@@ -24,13 +24,16 @@ func main() {
 	http.HandleFunc("/logs", config.BasicAuth(web.Logs))
 
 	// 新建协程,打开浏览器
-	go util.OpenExplore("http://127.0.0.1:" + port)
+	_, err := config.GetConfigCache()
+	if err != nil{
+		go util.OpenExplore("http://127.0.0.1:" + port)
+	}
 	log.Println(port, " 端口启动", "...")
 
 	// 定时运行
 	go dns.RunTimer()
 
-	err := http.ListenAndServe(":"+port, nil)
+	err = http.ListenAndServe(":"+port, nil)
 	if err != nil {
 		log.Println("启动时端口发生异常,1分钟内自动关闭窗口", err)
 		time.Sleep(time.Minute)

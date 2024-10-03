@@ -11,6 +11,8 @@
 ## 可选域名供应商
 + Alidns 阿里云
 + Dnspod 腾讯云
++ cloudflare
++ 华为云
 
 ## 依赖
 ```
