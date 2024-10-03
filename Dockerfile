@@ -12,6 +12,8 @@ RUN go env -w GO111MODULE=on \
 # FROM golang
 FROM golang:alpine
 WORKDIR /app
+ENV TZ=Asia/Shanghai
+# 添加时区
 COPY --from=builder /app/myddns /app/myddns
 EXPOSE 12138
 ENTRYPOINT /app/myddns
