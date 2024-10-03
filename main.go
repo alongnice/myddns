@@ -20,6 +20,8 @@ func main() {
 
 	http.HandleFunc("/", web.Writing)
 	http.HandleFunc("/save", web.Save)
+	// 添加日志模块
+	http.HandleFunc("/logs", web.Logs)
 
 	// 新建协程,打开浏览器
 	go util.OpenExplore("http://127.0.0.1:" + port)

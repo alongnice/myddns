@@ -112,7 +112,8 @@ func (dnspod *Dnspod) modify(result DnspodRecordListResp, domain *Domain, record
 	for _, record := range result.Records {
 		// 相同的无需操作
 		if record.Value == ipAddr {
-			log.Println("IP地址未发生变化，无需操作！", domain, "IP:", ipAddr)
+			// log.Println("IP地址未发生变化，无需操作！", domain, "IP:", ipAddr)
+			log.Printf("当前域名 %s 对应IP %s 未发生变化，无需操作。", domain, ipAddr)
 			continue
 		}
 
@@ -155,7 +156,7 @@ func (dnspod *Dnspod) getRecordList(domain *Domain, typ string) (result DnspodRe
 		"login_token": {dnspod.DNSConfig.ID + "," + dnspod.DNSConfig.Secret},
 		"domain":      {domain.DomainName},
 		"record_type": {typ},
-		"sub_domain":{domain.GetSubDomain()},
+		"sub_domain":  {domain.GetSubDomain()},
 		"format":      {"json"},
 	}
 
