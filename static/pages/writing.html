@@ -9,6 +9,7 @@
   <!-- Bootstrap CSS -->
   <link rel="stylesheet" href="/static/bootstrap.min.css">
   <link rel="stylesheet" href="/static/common.css">
+  <script src="/static/jquery-3.5.1.min.js"></script>
 </head>
 
 <body>
@@ -31,9 +32,12 @@
   <main role="main" style="margin-top: 15px">
     <div class="row">
       <div class="col-md-6 offset-md-3">
-        <form action="/save" method="post">
-
-          <button type="submit" class="btn btn-primary" style="margin-bottom: 15px;">Save</button>
+        <form>
+          <button class="btn btn-primary" style="margin-bottom: 15px;">Save</button>
+          <div class="alert alert-success", style="display: none;">
+            <strong id="resultMsg">保存成功</strong>
+          </div>
+        </form>
 
           <div class="portlet">
             <h5 class="portlet__head">DNS服务商</h5>
@@ -175,26 +179,43 @@
 
             </div>
           </div>
-          
-          <button type="submit" class="btn btn-primary">Save</button>
+        
+          <button class="btn btn-primary submit_btn" style="margin-bottom: 15px">Save</button>
 
         </form>
       </div>
       <div class="col-md-3">
-        <p class="font-weight-lighter text-break" style="margin-top: 115px;font-size: 13px;" id="logs"></p>
+        <p class="font-weight-light text-break" style="margin-top: 115px;font-size: 13px;" id="logs"></p>
       </div>
     </div>
   </main>
 
   <script>
-    function getQueryVariable() {
-      var query = window.location.search.substring(1);
-      if (query === "saveOk=true") {
-        window.location.href = "/"
-        alert("保存成功")
-      }
-    }
-    getQueryVariable()
+    $(function(){
+      $(".submit_btn").on('click', function(e){
+        e.preventDefault()
+        $('body').animate({ scrollTop: 0 }, 300);
+        $.ajax({
+          method: 'POST',
+          url: "/save",
+          data: $("form").serialize(),
+          success: function(result){
+            $('.alert').css("display", "block")
+            if (result !== "ok"){
+              $('.alert').addClass("alert-danger")
+              $('.alert').html(result)
+            }else{
+              setTimeout(function(){
+                $('.alert').css("display", "none")
+              }, 3000)
+            }
+          },
+          err: function(jqXHR){
+            alert(jqXHR.statusText);
+          }
+        })
+      })
+    })
     var beforeDnsID = ""
 
     function alidnsCheckedFun() {
@@ -250,14 +271,9 @@
 
   <script>
     function getLogs() {
-      var ajax = new XMLHttpRequest();
-      ajax.open("get", "/logs");
-      ajax.send();
-      ajax.onreadystatechange = function () {
-        if (ajax.readyState == 4 && ajax.status == 200) {
-          document.getElementById("logs").innerHTML = ajax.responseText
-        }
-      }
+      $.get("/logs", function(data, status){
+        $("#logs").html(data)
+      })
     }
 
     getLogs()
