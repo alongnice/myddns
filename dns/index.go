@@ -60,8 +60,7 @@ func (d Domain) GetSubDomain() string {
 
 // runOnce
 func RunOnce() {
-	conf := &config.Config{}
-	err := conf.InitConfigFromFile()
+	conf, err := config.GetConfigCache()
 	if err != nil {
 		return
 	}
@@ -78,7 +77,7 @@ func RunOnce() {
 		dnsSelected = &Alidns{}
 
 	}
-	dnsSelected.Init(conf)
+	dnsSelected.Init(&conf)
 	dnsSelected.AddUpdateIpv4DomainRecords()
 	dnsSelected.AddUpdateIpv6DomainRecords()
 }

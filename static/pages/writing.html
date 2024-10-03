@@ -20,13 +20,14 @@
             stroke-linecap="round" stroke-linejoin="round" stroke-width="2" aria-hidden="true" class="mr-2"
             viewBox="0 0 24 24" focusable="false">
             <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
-            <circle cx="12" cy="13" r="4" /></svg>
+            <circle cx="12" cy="13" r="4" />
+          </svg>
           <strong>MYDDNS</strong>
         </a>
       </div>
     </div>
   </header>
-  
+
   <main role="main" style="margin-top: 15px">
     <div class="row">
       <div class="col-md-6 offset-md-3">
@@ -42,19 +43,23 @@
                 <label class="col-sm-2 col-form-label"></label>
                 <div class="col-sm-10">
                   <div class="form-check form-check-inline col-form-label">
+                    <!-- <input class="form-check-input" type="radio" name="DnsName" id="alidns" value="alidns" onclick="alidnsCheckedFun()" {{if eq $.DNS.Name "alidns" }}checked{{end}}> -->
                     <input class="form-check-input" type="radio" name="DnsName" id="alidns" value="alidns" onclick="alidnsCheckedFun()" {{if eq $.DNS.Name "alidns"}}checked{{end}}>
                     <label class="form-check-label" for="alidns">
                       Alidns(阿里云)
                     </label>
                   </div>
                   <div class="form-check form-check-inline col-form-label">
+                    <!-- <input class="form-check-input" type="radio" name="DnsName" id="dnspod" value="dnspod" onclick="dnspodCheckedFun()" {{if eq $.DNS.Name "dnspod" }}checked{{end}}> -->
                     <input class="form-check-input" type="radio" name="DnsName" id="dnspod" value="dnspod" onclick="dnspodCheckedFun()" {{if eq $.DNS.Name "dnspod"}}checked{{end}}>
                     <label class="form-check-label" for="dnspod">
                       Dnspod(腾讯云)
                     </label>
                   </div>
                   <div class="form-check form-check-inline col-form-label">
+                    <!-- <input class="form-check-input" type="radio" name="DnsName" id="cloudflare" value="cloudflare" onclick="cloudflareCheckedFun()" {{if eq $.DNS.Name "cloudflare" }}checked{{end}}> -->
                     <input class="form-check-input" type="radio" name="DnsName" id="cloudflare" value="cloudflare" onclick="cloudflareCheckedFun()" {{if eq $.DNS.Name "cloudflare"}}checked{{end}}>
+
                     <label class="form-check-label" for="cloudflare">
                       Cloudflare
                     </label>
@@ -107,7 +112,7 @@
 {{$v}}
 {{- end -}}
                   </textarea>
-                  <small id="ipv4_domains_help" class="form-text text-muted">一行一个域名</small>
+                  <small id="ipv4_domains_help" class="form-text text-muted">每行一个域名</small>
                 </div>
               </div>
 
@@ -117,7 +122,7 @@
           <div class="portlet">
             <h5 class="portlet__head">IPV6</h5>
             <div class="portlet__body">
-              
+
               <div class="form-group row">
                 <label for="ipv6_enable" class="col-sm-2">是否启用</label>
                 <div class="col-sm-10">
@@ -141,13 +146,36 @@
 {{$v}}
 {{- end -}}
                   </textarea>
-                  <small id="ipv6_domains_help" class="form-text text-muted">一行一个域名</small>
+                  <small id="ipv6_domains_help" class="form-text text-muted">每行一个域名</small>
                 </div>
               </div>
 
             </div>
           </div>
 
+          <div class="portlet">
+            <h5 class="portlet__head">其他配置</h5>
+            <div class="portlet__body">
+
+              <div class="form-group row">
+                <label for="Username" class="col-sm-2 col-form-label">登录用户名</label>
+                <div class="col-sm-10">
+                  <input class="form-control" name="Username" id="Username" value="{{.Username}}" aria-describedby="Username_help">
+                  <small id="Username_help" class="form-text text-muted">为了安全,建议输入</small>
+                </div>
+              </div>
+
+              <div class="form-group row">
+                <label for="Password" class="col-sm-2 col-form-label">登录密码</label>
+                <div class="col-sm-10">
+                  <input class="form-control" type="password" name="Password" id="Password" value="{{.Password}}" aria-describedby="Password_help">
+                  <small id="Password_help" class="form-text text-muted">为了安全,建议输入</small>
+                </div>
+              </div>
+
+            </div>
+          </div>
+          
           <button type="submit" class="btn btn-primary">Save</button>
 
         </form>
@@ -159,7 +187,7 @@
   </main>
 
   <script>
-    function getQueryVariable(){
+    function getQueryVariable() {
       var query = window.location.search.substring(1);
       if (query === "saveOk=true") {
         window.location.href = "/"
@@ -167,12 +195,12 @@
       }
     }
     getQueryVariable()
-    var beforeDnsID=""
+    var beforeDnsID = ""
 
     function alidnsCheckedFun() {
-      document.getElementById("DnsID").disabled= false
+      document.getElementById("DnsID").disabled = false
       if (beforeDnsID)
-        document.getElementById("DnsID").value= beforeDnsID
+        document.getElementById("DnsID").value = beforeDnsID
 
       document.getElementById("dnsIdLabel").innerHTML = "AccessKey ID"
       document.getElementById("dnsSecretLabel").innerHTML = "AccessKey Secret"
@@ -180,9 +208,9 @@
     }
 
     function dnspodCheckedFun() {
-      document.getElementById("DnsID").disabled= false
+      document.getElementById("DnsID").disabled = false
       if (beforeDnsID)
-        document.getElementById("DnsID").value= beforeDnsID
+        document.getElementById("DnsID").value = beforeDnsID
 
       document.getElementById("dnsIdLabel").innerHTML = "ID"
       document.getElementById("dnsSecretLabel").innerHTML = "Token"
@@ -192,15 +220,15 @@
     function cloudflareCheckedFun() {
       document.getElementById("dnsIdLabel").innerHTML = ""
       beforeDnsID = document.getElementById("DnsID").value
-      document.getElementById("DnsID").disabled= true
-      document.getElementById("DnsID").value= ""
+      document.getElementById("DnsID").disabled = true
+      document.getElementById("DnsID").value = ""
       document.getElementById("dnsSecretLabel").innerHTML = "Token"
       document.getElementById("dns_help").innerHTML = "https://dash.cloudflare.com/profile/api-tokens"
     }
 
     var dnsName = '{{$.DNS.Name}}'
 
-    switch(dnsName){
+    switch (dnsName) {
       case "alidns": {
         alidnsCheckedFun()
         break;
@@ -223,12 +251,12 @@
   <script>
     function getLogs() {
       var ajax = new XMLHttpRequest();
-      ajax.open("get","/logs");
+      ajax.open("get", "/logs");
       ajax.send();
       ajax.onreadystatechange = function () {
-        if (ajax.readyState==4 && ajax.status==200) {
+        if (ajax.readyState == 4 && ajax.status == 200) {
           document.getElementById("logs").innerHTML = ajax.responseText
-      　}
+        }
       }
     }
 

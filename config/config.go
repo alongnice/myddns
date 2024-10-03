@@ -2,11 +2,13 @@ package config
 
 import (
 	"io"
+	"io/ioutil"
 	"log"
 	"myddns/util"
 	"net/http"
 	"os"
 	"regexp"
+	"sync"
 
 	"gopkg.in/yaml.v2"
 )
@@ -37,26 +39,60 @@ type Config struct {
 		Domains []string
 	}
 	DNS DNSConfig
+	User
 }
 
-func (conf *Config) InitConfigFromFile() error {
+// 配置缓存
+var configCache *Config
+var lock sync.Mutex
+
+// 获得配置
+// func (conf *Config) InitConfigFromFile() error {
+func GetConfigCache() (conf Config, err error) {
+	if configCache != nil {
+		return *configCache, nil
+	}
+	lock.Lock()
+	defer lock.Unlock()
+
+	configCache = &Config{}
+
 	// 从文件中读取配置
 	configFilePath := util.GetConfigFromFile()
-	_, err := os.Stat(configFilePath)
+	_, err = os.Stat(configFilePath)
 	if err != nil {
-		log.Println("config.yaml 文件不存在")
-		return err
+		log.Println("config.yaml 文件不存在,请输入配置文件")
+		return *configCache, err
 	}
-	byt, err := os.ReadFile("config.yaml")
+	byt, err := ioutil.ReadFile(configFilePath)
 	if err != nil {
 		log.Println("config.yaml 读取失败")
+		return *configCache, err
+	}
+	// log.Println("config.yaml 读取成功")
+	// 解析配置
+	yaml.Unmarshal(byt, configCache)
+	// 对byt进行操作，切片解码给到conf
+	return *configCache, err
+}
+
+// 保存配置
+func (conf *Config) SaveConfig() (err error) {
+	byt, err := yaml.Marshal(conf)
+	if err != nil {
+		log.Println(err)
 		return err
 	}
-	log.Println("config.yaml 读取成功")
-	// 解析配置
-	yaml.Unmarshal(byt, conf)
-	// 对byt进行操作，切片解码给到conf
-	return nil
+
+	err = ioutil.WriteFile(util.GetConfigFromFile(), byt, 0600)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	// 清空配置缓存
+	configCache = nil
+
+	return
 }
 
 func (conf *Config) GetIpv4Addr() (result string) {

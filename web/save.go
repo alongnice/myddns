@@ -1,38 +1,29 @@
 package web
 
 import (
-	"io/ioutil"
-	"log"
 	"myddns/config"
-	"myddns/util"
+	"myddns/dns"
 	"net/http"
 	"strings"
-
-	"gopkg.in/yaml.v2"
 )
 
 // 保存
 func Save(writer http.ResponseWriter, request *http.Request) {
-	conf := &config.Config{}
-	// 创建一个配置变量
-
-	conf.InitConfigFromFile()
+	conf, _ := config.GetConfigCache()
 	idNew := request.FormValue("DnsID")
 	secretNew := request.FormValue("DnsSecret")
 
-	idHide, secretHide := getHideSecret(conf)
+	idHide, secretHide := getHideIDSecret(&conf)
 
-	if idNew != idHide{
+	if idNew != idHide {
 		conf.DNS.ID = idNew
 	}
-	if secretNew != secretHide{
+	if secretNew != secretHide {
 		conf.DNS.Secret = secretNew
 	}
 
-
 	conf.DNS.Name = request.FormValue("DnsName")
 	// 从request中获取值，赋值给配置变量
-
 
 	conf.Ipv4.Enable = request.FormValue("Ipv4Enable") == "on"
 	conf.Ipv4.URL = request.FormValue("Ipv4Url")
@@ -41,19 +32,15 @@ func Save(writer http.ResponseWriter, request *http.Request) {
 
 	conf.Ipv6.Enable = request.FormValue("Ipv6Enable") == "on"
 	conf.Ipv6.URL = request.FormValue("Ipv6Url")
-	conf.Ipv4.Domains = strings.Split(request.FormValue("Ipv6Domains"), "\r\n")
+	conf.Ipv6.Domains = strings.Split(request.FormValue("Ipv6Domains"), "\r\n")
+
+	conf.Username = request.FormValue("Username")
+	conf.Password = request.FormValue("Password")
 
 	// 保存到用户目录
-	util.GetConfigFromFile()
-	// 打开配置文件
-	byt, err := yaml.Marshal(conf)
-	// 将配置变量转换为yaml格式
-	if err != nil {
-		log.Println(err)
-	}
+	conf.SaveConfig()
 
-	ioutil.WriteFile(util.GetConfigFromFile(), byt, 0644)
-	// 写入配置文件 从byt中读取 文件权限644
+	go dns.RunOnce()
 
 	// 跳转
 	http.Redirect(writer, request, "/?saveOk=true", http.StatusFound)

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"myddns/config"
 	"myddns/dns"
 	"myddns/static"
 	"myddns/util"
@@ -18,10 +19,9 @@ func main() {
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(static.AssetFile())))
 	http.Handle("/favicon.ico", http.StripPrefix("/", http.FileServer(static.AssetFile())))
 
-	http.HandleFunc("/", web.Writing)
-	http.HandleFunc("/save", web.Save)
-	// 添加日志模块
-	http.HandleFunc("/logs", web.Logs)
+	http.HandleFunc("/", config.BasicAuth(web.Writing))
+	http.HandleFunc("/save", config.BasicAuth(web.Save))
+	http.HandleFunc("/logs", config.BasicAuth(web.Logs))
 
 	// 新建协程,打开浏览器
 	go util.OpenExplore("http://127.0.0.1:" + port)
