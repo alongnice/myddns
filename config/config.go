@@ -43,37 +43,50 @@ type Config struct {
 }
 
 // 配置缓存
-var configCache *Config
-var lock sync.Mutex
+type cacheType struct {
+	ConfigSingle *Config
+	Err          error
+	Lock         sync.Mutex
+}
+
+var cache = &cacheType{}
 
 // 获得配置
 // func (conf *Config) InitConfigFromFile() error {
 func GetConfigCache() (conf Config, err error) {
-	if configCache != nil {
-		return *configCache, nil
+	if cache.ConfigSingle != nil {
+		return *cache.ConfigSingle, cache.Err
 	}
-	lock.Lock()
-	defer lock.Unlock()
+	cache.Lock.Lock()
+	defer cache.Lock.Unlock()
 
-	configCache = &Config{}
+	cache.ConfigSingle = &Config{}
 
 	// 从文件中读取配置
 	configFilePath := util.GetConfigFromFile()
 	_, err = os.Stat(configFilePath)
 	if err != nil {
 		log.Println("config.yaml 文件不存在,请输入配置文件")
-		return *configCache, err
+		cache.Err = err
+		return *cache.ConfigSingle, err
 	}
 	byt, err := ioutil.ReadFile(configFilePath)
 	if err != nil {
 		log.Println("config.yaml 读取失败")
-		return *configCache, err
+		cache.Err = err
+		return *cache.ConfigSingle, err
 	}
-	// log.Println("config.yaml 读取成功")
-	// 解析配置
-	yaml.Unmarshal(byt, configCache)
+
+	err = yaml.Unmarshal(byt, cache.ConfigSingle)
+	if err != nil {
+		log.Println("反序列化配置文件,失败", err)
+		cache.Err = err
+		return *cache.ConfigSingle, err
+	}
+
+	cache.Err = nil
 	// 对byt进行操作，切片解码给到conf
-	return *configCache, err
+	return *cache.ConfigSingle, err
 }
 
 // 保存配置
@@ -90,7 +103,7 @@ func (conf *Config) SaveConfig() (err error) {
 		return
 	}
 	// 清空配置缓存
-	configCache = nil
+	cache.ConfigSingle = nil
 
 	return
 }
