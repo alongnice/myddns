@@ -12,6 +12,7 @@ RUN go env -w GO111MODULE=on \
 # FROM golang
 FROM alpine
 WORKDIR /app
+RUN apk add --no-cache tzdata
 ENV TZ=Asia/Shanghai
 # 添加时区
 COPY --from=builder /app/myddns /app/myddns
