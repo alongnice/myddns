@@ -39,5 +39,18 @@ docker run -d \
     alongnice/myddns
 ```
 
+## 使用 IPV6
+    - 前提: 你的环境需要支持 IPV6
+    - Windows/Mac 系统推荐在 `系统中使用`, windows/mac 桌面的docker不支持主机网络
+    - Linux环境推荐在 `主机网络` 下使用
+   
+```
+docker run -d \
+    --name myddns \
+    --restart=always \
+    --net=host \
+    alongnice/myddns
+```
+
 - 在docker主机上打开[http://127.0.0.1:12138](http://127.0.0.1:12138)，修改你的配置，成功
 ![avatar](myddns.png)
