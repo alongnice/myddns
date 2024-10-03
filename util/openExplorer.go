@@ -23,7 +23,7 @@ func OpenExplore(urt string) {
 
 	err := exec.Command(cmd, args...).Start()
 	if err != nil {
-		fmt.Println("浏览器打开失败:", err)
+		fmt.Println("浏览器打开失败:", err.Error(),"请手动打开")
 	} else {
 		fmt.Println("浏览器打开成功")
 	}

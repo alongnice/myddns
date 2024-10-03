@@ -22,7 +22,7 @@ func GetHTTPResponse(resp *http.Response, url string, err error, result interfac
 		if err != nil {
 			log.Println("接口请求 失败： ", err, "URL", url)
 		}
-		if resp.StatusCode != 200 {
+		if resp.StatusCode != 200 && resp.StatusCode != 202 {
 			log.Printf("请求接口 %s 失败! %s \n",url, string(body))
 			err = fmt.Errorf("请求接口 %s 失败! %s \n",url, string(body))
 		}

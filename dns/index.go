@@ -73,9 +73,10 @@ func RunOnce() {
 		dnsSelected = &Dnspod{}
 	case "cloudflare":
 		dnsSelected = &Cloudflare{}
+	case "huaweicloud":
+		dnsSelected = &Huaweicloud{}
 	default:
 		dnsSelected = &Alidns{}
-
 	}
 	dnsSelected.Init(&conf)
 	dnsSelected.AddUpdateIpv4DomainRecords()
