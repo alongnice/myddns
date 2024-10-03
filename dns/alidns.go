@@ -32,13 +32,9 @@ func (ali *Alidns) Init(conf *config.Config) {
 	// 将原本解析域名的操作向下传递
 }
 
-// 添加或者更新IPv4记录
-func (ali *Alidns) AddUpdateIpv4DomainRecords() {
+// 添加或者更新IPv4/IPv6记录
+func (ali *Alidns) AddUpdateDomainRecords() {
 	ali.AddUpdateIpvDomainRecords("A")
-}
-
-// 添加或者更新IPv6记录
-func (ali *Alidns) AddUpdateIpv6DomainRecords() {
 	ali.AddUpdateIpvDomainRecords("AAAA")
 }
 

@@ -55,12 +55,14 @@ func Writing(writer http.ResponseWriter, request *http.Request) {
 const displayCount int = 3
 
 func getHideIDSecret(conf *config.Config) (idHide string, secretHide string) {
-	if len(conf.DNS.ID) > displayCount {
+	// webhook 显示所有ID
+	if len(conf.DNS.ID) > displayCount && conf.DNS.Name == "webhook" {
 		idHide = conf.DNS.ID[:displayCount] + strings.Repeat("*", len(conf.DNS.ID)-displayCount)
 	}else{
 		idHide = conf.DNS.ID
 	}
-	if len(conf.DNS.Secret) > displayCount {
+	// webhook 显示所有Secret
+	if len(conf.DNS.Secret) > displayCount && conf.DNS.Name == "webhook"{
 		secretHide = conf.DNS.Secret[:displayCount] + strings.Repeat("*", len(conf.DNS.Secret)-displayCount)
 	}else{
 		secretHide = conf.DNS.Secret

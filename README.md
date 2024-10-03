@@ -45,7 +45,11 @@ docker run -d \
 ## 使用 IPV6
     - 前提: 你的环境需要支持 IPV6
     - Windows/Mac 系统推荐在 `系统中使用`, windows/mac 桌面的docker不支持主机网络 `--net=host`
-    - Linux环境推荐在 `--net=host` 下使用
+    - Linux的x86或arm架构，如服务器、群晖(网络中勾选`使用与docker相同的网络`)、xx盒子等等，推荐使用`--net=host`模式
+    - 
+    - 群晖：使用docker。
+    - 1. 注册表中搜索`ddns-go`并下载。 
+    - 2. 映像 -> 选择`jeessy/ddns-go` -> 启动 -> 高级设置 -> 网络中勾选`使用与 Docker Host 相同的网络`)
    
 ```
 docker run -d \
@@ -54,7 +58,28 @@ docker run -d \
     --net=host \
     alongnice/myddns
 ```
+- 虚拟机存在可能能获取IPV6,但是无法正常访问
 - [可选] 使用IPV6后，建议设置登录用户名和密码
+
+## Webhook
+- 支持webhook, 当IP变化, 会回调填写的URL
+- 支撑变量
+  
+| 变量名 | 说明 |
+| ----- | ---- |
+| #{ipv4New}| 新的ipv4地址 |
+| #{ipv4Old}| 旧的ipv4地址 |
+| #{ipv6New}| 新的ipv6地址 |
+| #{ipv6Old}| 旧的ipv6地址 |
+| #{ipv4Domains}|Ipv4的域名,多个域名用逗号分隔 |
+| #{ipv6Domains}|Ipv6的域名,多个域名用逗号分隔 |
+
+- RequestBody 为空 GET 请求, 不为空 POST 请求
+- 示例
+- URL:  `https://sc.ftqq.com/[SCKEY].send?text=主人IP变了#{ipv4New}`
+- RequestBody:  `{"text":"你的IPv4已变为#{ipv4New}","desp":"域名有#{ipv4Domains}"}}`
+
+---
 
 - 在docker主机上打开[http://127.0.0.1:12138](http://127.0.0.1:12138)，修改你的配置，成功
 ![avatar](myddns.png)

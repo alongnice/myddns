@@ -46,13 +46,9 @@ func (dnspod *Dnspod) Init(conf *config.Config) {
 	dnspod.Domains.ParseDomain(conf)
 }
 
-// 添加或者更新IPv4记录
-func (dnspod *Dnspod) AddUpdateIpv4DomainRecords() {
+// 添加或者更新IPv4/IPv6记录
+func (dnspod *Dnspod) AddUpdateDomainRecords() {
 	dnspod.AddUpdateIpvDomainRecords("A")
-}
-
-// 添加或者更新IPv6记录
-func (dnspod *Dnspod) AddUpdateIpv6DomainRecords() {
 	dnspod.AddUpdateIpvDomainRecords("AAAA")
 }
 

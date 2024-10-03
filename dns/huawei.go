@@ -44,13 +44,12 @@ func (hw *Huaweicloud) Init(conf *config.Config){
 	hw.DNSConfig = conf.DNS
 	hw.Domains.ParseDomain(conf)
 }
-func (hw *Huaweicloud) AddUpdateIpv4DomainRecords(){
-	hw.AddUpdateDomainRecords("A")
+// 添加或者更新IPv4/IPv6记录
+func (hw *Huaweicloud) AddUpdateDomainRecords() {
+	hw.addUpdateDomainRecords("A")
+	hw.addUpdateDomainRecords("AAAA")
 }
-func (hw *Huaweicloud) AddUpdateIpv6DomainRecords(){
-	hw.AddUpdateDomainRecords("AAAA")
-}
-func (hw *Huaweicloud) AddUpdateDomainRecords(recordType string){
+func (hw *Huaweicloud) addUpdateDomainRecords(recordType string){
 	ipAddr := hw.Ipv4Addr
 	domains := hw.Ipv4Domains
 	if recordType == "AAAA"{
@@ -183,7 +182,7 @@ func (hw *Huaweicloud) request(method string, url string, data interface{}, resu
 	req.Header.Add("content-type", "application/json")
 
 	clt := http.Client{}
-	clt.Timeout = 1 * time.Minute
+	clt.Timeout = 30 * time.Second
 	resp, err := clt.Do(req)
 	err = util.GetHTTPResponse(resp, url, err, result)
 	return

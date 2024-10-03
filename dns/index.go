@@ -11,10 +11,8 @@ import (
 type DNS interface {
 	// AddRecord(conf *config.Config) (ipv4 bool, ipv6 bool)
 	Init(conf *config.Config)
-	AddUpdateIpv4DomainRecords()
-	// 添加或更新IPv4记录
-	AddUpdateIpv6DomainRecords()
-	// 添加或更新IPv6记录
+	// 添加或更新 IPV4/IPV6 记录
+	AddUpdateDomainRecords()
 }
 
 // ipv4,ipv6的域
@@ -75,12 +73,13 @@ func RunOnce() {
 		dnsSelected = &Cloudflare{}
 	case "huaweicloud":
 		dnsSelected = &Huaweicloud{}
+	case "webhook":
+		dnsSelected = &Webhook{}
 	default:
 		dnsSelected = &Alidns{}
 	}
 	dnsSelected.Init(&conf)
-	dnsSelected.AddUpdateIpv4DomainRecords()
-	dnsSelected.AddUpdateIpv6DomainRecords()
+	dnsSelected.AddUpdateDomainRecords()
 }
 
 // RunTimer 定时运行
