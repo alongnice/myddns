@@ -10,7 +10,7 @@ RUN go env -w GO111MODULE=on \
 
 # 构建结束，构建服务
 # FROM golang
-FROM golang:alpine
+FROM alpine
 WORKDIR /app
 ENV TZ=Asia/Shanghai
 # 添加时区
