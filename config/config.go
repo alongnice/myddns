@@ -162,7 +162,7 @@ func (conf *Config) GetIpv6Addr() (result string) {
 			// 从网卡获取IP
 			ipv4, _, err := GetNetInterface()
 			if err != nil {
-				log.Println("获取ipv4地址失败")
+				log.Println("获取ipv6地址失败")
 				return
 			}
 
@@ -171,7 +171,7 @@ func (conf *Config) GetIpv6Addr() (result string) {
 					return netInterface.Address[0]
 				}
 			}
-			log.Println("从网卡中获取IPv4失败,网卡名:", conf.Ipv4.NetInterface)
+			log.Println("从网卡中获取IPv6失败,网卡名:", conf.Ipv6.NetInterface)
 			return
 		}
 
