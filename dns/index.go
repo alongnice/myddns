@@ -1,6 +1,7 @@
 package dns
 
 import (
+	"log"
 	"myddns/config"
 	"time"
 )
@@ -17,6 +18,7 @@ type DNS interface {
 func RunOnce() {
 	conf, err := config.GetConfigCache()
 	if err != nil {
+		log.Println("获取配置失败", err)
 		return
 	}
 
@@ -40,9 +42,9 @@ func RunOnce() {
 }
 
 // RunTimer 定时运行
-func RunTimer() {
+func RunTimer(delay time.Duration) {
 	for {
 		RunOnce()
-		time.Sleep(time.Second * time.Duration(5))
+		time.Sleep(delay)
 	}
 }

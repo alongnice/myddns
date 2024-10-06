@@ -7,7 +7,7 @@ import (
 )
 
 // OpenExplore 打开浏览器
-func OpenExplore(urt string) {
+func OpenExplore(url string) {
 	var cmd string
 	var args []string
 	switch runtime.GOOS {
@@ -19,11 +19,11 @@ func OpenExplore(urt string) {
 	default:
 		cmd = "xdg-open"
 	}
-	args = append(args, urt)
+	args = append(args, url)
 
 	err := exec.Command(cmd, args...).Start()
 	if err != nil {
-		fmt.Println("浏览器打开失败:", err.Error(),"请手动打开")
+		fmt.Println("浏览器打开失败:", err.Error(), "请手动打开")
 	} else {
 		fmt.Println("浏览器打开成功")
 	}

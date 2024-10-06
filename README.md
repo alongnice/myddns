@@ -13,6 +13,7 @@
 + Dnspod 腾讯云
 + cloudflare
 + 华为云
++ webhook
 
 ## 依赖
 ```
@@ -29,6 +30,7 @@ go-bindata -pkg static -o static/js_css_data.go -fs -prefix "static/" static/
 ## 普通环境使用
 - 下载[https://github.com/alongnice/myddns/releases](https://github.com/alongnice/myddns/releases)
 - 运行，程序将自行打开浏览器，访问 [http://127.0.0.1:12138](http://127.0.0.1:12138)完成配置修改
+- [可选] 支持启动带参数 `-l`监听地址 `-f`间隔时间（秒）。如：`./ddns-go -l 127.0.0.1:9876 -f 300` 
 
 
 
