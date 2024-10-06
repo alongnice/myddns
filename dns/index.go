@@ -38,7 +38,7 @@ func RunOnce() {
 	dnsSelected.Init(&conf)
 
 	domains := dnsSelected.AddUpdateDomainRecords()
-	domains.ExecWebhook(&conf)
+	config.ExecWebhook(&domains, &conf)
 }
 
 // RunTimer 定时运行

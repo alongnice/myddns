@@ -7,8 +7,11 @@
 - /logs 子域名 页面快速查看最近50条日志 简化日志审查
 - 网页中简单配置,可设置用户名账号密码
 - 复刻自 ddns-go
+- 支持接口/网卡获取IP
+
 
 ## 可选域名供应商
+
 + Alidns 阿里云
 + Dnspod 腾讯云
 + cloudflare
@@ -16,18 +19,21 @@
 + webhook
 
 ## 依赖
+
 ```
  go get -u github.com/go-bindata/go-bindata/...
  go-bindata -debug -pkg util -o util/staticPagesData.go static/pages/...
  go-bindata -pkg static -o static/js_css_data.go -fs -prefix "static/" static/
 ```
 ## 发布
+
 ```
 go-bindata -pkg util -o util/staticPagesData.go static/pages/...
 go-bindata -pkg static -o static/js_css_data.go -fs -prefix "static/" static/
 ```
 
 ## 普通环境使用
+
 - 下载[https://github.com/alongnice/myddns/releases](https://github.com/alongnice/myddns/releases)
 - 运行，程序将自行打开浏览器，访问 [http://127.0.0.1:12138](http://127.0.0.1:12138)完成配置修改
 - [可选] 支持启动带参数 `-l`监听地址 `-f`间隔时间（秒）。如：`./ddns-go -l 127.0.0.1:9876 -f 300` 
@@ -36,6 +42,7 @@ go-bindata -pkg static -o static/js_css_data.go -fs -prefix "static/" static/
 
 
 ## Docker使用
+
 ```
 docker run -d \
     --name myddns \ 
@@ -45,14 +52,15 @@ docker run -d \
 ```
 
 ## 使用 IPV6
+
     - 前提: 你的环境需要支持 IPV6
     - Windows/Mac 系统推荐在 `系统中使用`, windows/mac 桌面的docker不支持主机网络 `--net=host`
     - Linux的x86或arm架构，如服务器、群晖(网络中勾选`使用与docker相同的网络`)、xx盒子等等，推荐使用`--net=host`模式
     - 
-    - 群晖：使用docker。
-    - 1. 注册表中搜索`ddns-go`并下载。 
-    - 2. 映像 -> 选择`jeessy/ddns-go` -> 启动 -> 高级设置 -> 网络中勾选`使用与 Docker Host 相同的网络`)
-   
+    - 群晖：
+      - 套件中心下载docker并打开
+      - 注册表中搜索`ddns-go`并下载
+      - 映像 -> 选择`jeessy/ddns-go` -> 启动 -> 高级设置 -> 网络中勾选`使用与 Docker Host 相同的网络`，高级设置中勾选`启动自动重新启动`
 ```
 docker run -d \
     --name myddns \
@@ -64,6 +72,7 @@ docker run -d \
 - [可选] 使用IPV6后，建议设置登录用户名和密码
 
 ## Webhook
+
 - 支持webhook, 当IP更新成功或者失败, 会回调填写的URL
 - 支撑变量
   
