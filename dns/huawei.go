@@ -1,67 +1,65 @@
 package dns
 
-import(
-	"myddns/config"
-	"myddns/util"
-	"fmt"
-	"log"
-	"net/http"
-	"time"
+import (
 	"bytes"
 	"encoding/json"
+	"fmt"
+	"log"
+	"myddns/config"
+	"myddns/util"
+	"net/http"
+	"time"
 )
 
 const (
 	huaweicloudEndpoint string = "https://dns/myhuaweicloud.com"
 )
 
-type Huaweicloud struct{
+type Huaweicloud struct {
 	DNSConfig config.DNSConfig
-	Domains
+	Domains   config.Domains
 }
 
-type HuaweicloudRecordsets struct{
-    ID string
-	Name string `json:"name"`
-	ZoneID string `json:"zone_id"`
-	Status string
-	Type string `json:"type"`
+type HuaweicloudRecordsets struct {
+	ID      string
+	Name    string `json:"name"`
+	ZoneID  string `json:"zone_id"`
+	Status  string
+	Type    string   `json:"type"`
 	Records []string `json:"records"`
 }
 
-type HuaweicloudZoneResp struct{
-	Zones []struct{
-		ID string
-		Name string
+type HuaweicloudZoneResp struct {
+	Zones []struct {
+		ID         string
+		Name       string
 		Recordsets []HuaweicloudRecordsets
 	}
 }
-type HuaweicloudRecordsResp struct{
+type HuaweicloudRecordsResp struct {
 	Recordsets []HuaweicloudRecordsets
 }
 
-func (hw *Huaweicloud) Init(conf *config.Config){
+func (hw *Huaweicloud) Init(conf *config.Config) {
 	hw.DNSConfig = conf.DNS
 	hw.Domains.ParseDomain(conf)
 }
+
 // 添加或者更新IPv4/IPv6记录
-func (hw *Huaweicloud) AddUpdateDomainRecords() {
+func (hw *Huaweicloud) AddUpdateDomainRecords() config.Domains {
 	hw.addUpdateDomainRecords("A")
 	hw.addUpdateDomainRecords("AAAA")
+	return hw.Domains
 }
-func (hw *Huaweicloud) addUpdateDomainRecords(recordType string){
-	ipAddr := hw.Ipv4Addr
-	domains := hw.Ipv4Domains
-	if recordType == "AAAA"{
-	    ipAddr = hw.Ipv6Addr
-		domains = hw.Domains.Ipv6Domains
-	}
-	if ipAddr == ""{
-	    return
+func (hw *Huaweicloud) addUpdateDomainRecords(recordType string) {
+	ipAddr, domains := hw.Domains.ParseDomainResult(recordType)
+
+	if ipAddr == "" {
+		return
 	}
 
-	for _, domain := range domains{
-	    var records HuaweicloudRecordsResp
+	for _, domain := range domains {
+		var records HuaweicloudRecordsResp
 
 		err := hw.request(
 			"GET",
@@ -70,46 +68,45 @@ func (hw *Huaweicloud) addUpdateDomainRecords(recordType string){
 			&records,
 		)
 
-		if err != nil{
-		    return 
+		if err != nil {
+			return
 		}
 
 		find := false
-		for _, record := range records.Recordsets{
-			if record.Name == domain.String()+"."{
-			    hw.modify(record, domain, recordType, ipAddr)
+		for _, record := range records.Recordsets {
+			if record.Name == domain.String()+"." {
+				hw.modify(record, domain, recordType, ipAddr)
 				find = true
 				break
 			}
 		}
 
-		if !find{
-		    hw.create(domain, recordType, ipAddr)
+		if !find {
+			hw.create(domain, recordType, ipAddr)
 		}
 	}
 }
 
-
 // 创建
-func (hw *Huaweicloud) create(domain *Domain, recordType string, ipAddr string){
+func (hw *Huaweicloud) create(domain *config.Domain, recordType string, ipAddr string) {
 	zone, err := hw.getZones(domain)
-	if err != nil{
-	   return 
+	if err != nil {
+		return
 	}
-	if len(zone.Zones) == 0{
+	if len(zone.Zones) == 0 {
 		log.Println("未能找到公网域名,请检查域名是否添加")
-	    return
+		return
 	}
 	zoneID := zone.Zones[0].ID
-	for _,z := range zone.Zones{
-	    if z.Name == domain.DomainName+"."{
+	for _, z := range zone.Zones {
+		if z.Name == domain.DomainName+"." {
 			zoneID = z.ID
 			break
 		}
 	}
 	record := &HuaweicloudRecordsets{
-		Type: recordType,
-		Name: domain.String()+".",
+		Type:    recordType,
+		Name:    domain.String() + ".",
 		Records: []string{ipAddr},
 	}
 	var result HuaweicloudRecordsets
@@ -119,15 +116,18 @@ func (hw *Huaweicloud) create(domain *Domain, recordType string, ipAddr string){
 		record,
 		&result,
 	)
-	if err == nil && (len(result.Records) > 0 && result.Records[0] != ipAddr){
+	if err == nil && (len(result.Records) > 0 && result.Records[0] != ipAddr) {
 		log.Printf("创建域名记录成功 域名 %s ;IP: %s", domain, ipAddr)
-	}else{
+		domain.UpdateStatus = config.UpdatedSuccess
+	} else {
 		log.Printf("创建域名记录失败 域名 %s ;IP: %s Status: %s", domain, ipAddr, result.Status)
+		domain.UpdateStatus = config.UpdatedFail
 	}
 }
+
 // 更新
-func (hw *Huaweicloud) modify(record HuaweicloudRecordsets, domain *Domain, recordType string, ipAddr string){
-	if len(record.Records) > 0 && record.Records[0] == ipAddr{
+func (hw *Huaweicloud) modify(record HuaweicloudRecordsets, domain *config.Domain, recordType string, ipAddr string) {
+	if len(record.Records) > 0 && record.Records[0] == ipAddr {
 		log.Printf("域名 %s ;IP: %s 无需更新")
 		return
 	}
@@ -142,14 +142,17 @@ func (hw *Huaweicloud) modify(record HuaweicloudRecordsets, domain *Domain, reco
 		&request,
 		&result,
 	)
-	if err == nil && (len(result.Records) > 0 && result.Records[0] == ipAddr){
+	if err == nil && (len(result.Records) > 0 && result.Records[0] == ipAddr) {
 		log.Printf("更新域名记录成功 域名 %s ;IP: %s", domain, ipAddr)
-	}else{
+		domain.UpdateStatus = config.UpdatedSuccess
+	} else {
 		log.Printf("更新域名记录失败 域名 %s ;IP: %s Status: %s", domain, ipAddr, result.Status)
+		domain.UpdateStatus = config.UpdatedFail
 	}
 }
+
 // 获得域名记录列表
-func (hw *Huaweicloud) getZones(domain *Domain)(result HuaweicloudZoneResp, err error){
+func (hw *Huaweicloud) getZones(domain *config.Domain) (result HuaweicloudZoneResp, err error) {
 	err = hw.request(
 		"GET",
 		fmt.Sprintf(huaweicloudEndpoint+"/v2/zones?name=%s", domain.DomainName),
@@ -158,24 +161,25 @@ func (hw *Huaweicloud) getZones(domain *Domain)(result HuaweicloudZoneResp, err 
 	)
 	return
 }
+
 // 统一请求接口
-func (hw *Huaweicloud) request(method string, url string, data interface{}, result interface{}) (err error){
+func (hw *Huaweicloud) request(method string, url string, data interface{}, result interface{}) (err error) {
 	jsonStr := make([]byte, 0)
-	if data != nil{
+	if data != nil {
 		jsonStr, _ = json.Marshal(data)
 	}
 
 	req, err := http.NewRequest(
-		method, 
-		url, 
+		method,
+		url,
 		bytes.NewBuffer(jsonStr),
 	)
-	if err != nil{
-	    log.Println("创建请求失败", err)
+	if err != nil {
+		log.Println("创建请求失败", err)
 		return
 	}
 	s := util.Signer{
-		Key: hw.DNSConfig.ID,
+		Key:    hw.DNSConfig.ID,
 		Secret: hw.DNSConfig.Secret,
 	}
 	s.Sign(req)

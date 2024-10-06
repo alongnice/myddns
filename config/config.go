@@ -40,6 +40,7 @@ type Config struct {
 	}
 	DNS DNSConfig
 	User
+	Webhook
 }
 
 // 配置缓存

@@ -18,7 +18,7 @@ const (
 // cloudFlare实现
 type Cloudflare struct {
 	DNSConfig config.DNSConfig
-	Domains
+	Domains   config.Domains
 }
 
 // CloudflareStatus 公共状态
@@ -61,18 +61,14 @@ func (cf *Cloudflare) Init(conf *config.Config) {
 }
 
 // 添加或者更新IPv4/IPv6记录
-func (cf *Cloudflare) AddUpdateDomainRecords() {
+func (cf *Cloudflare) AddUpdateDomainRecords() config.Domains {
 	cf.AddUpdateIpvDomainRecords("A")
 	cf.AddUpdateIpvDomainRecords("AAAA")
+	return cf.Domains
 }
 
 func (cf *Cloudflare) AddUpdateIpvDomainRecords(recordType string) {
-	ipAddr := cf.Ipv4Addr
-	domains := cf.Ipv4Domains
-	if recordType == "AAAA" {
-		ipAddr = cf.Ipv6Addr
-		domains = cf.Ipv6Domains
-	}
+	ipAddr, domains := cf.Domains.ParseDomainResult(recordType)
 
 	if ipAddr == "" {
 		return
@@ -82,6 +78,7 @@ func (cf *Cloudflare) AddUpdateIpvDomainRecords(recordType string) {
 		// get zone 获得域
 		result, err := cf.getZones(domain)
 		if err != nil || len(result.Result) != 1 {
+			domain.UpdateStatus = config.UpdatedFail
 			return
 		}
 		zoneID := result.Result[0].ID
@@ -103,7 +100,7 @@ func (cf *Cloudflare) AddUpdateIpvDomainRecords(recordType string) {
 		}
 	}
 }
-func (cf *Cloudflare) getZones(domain *Domain) (result CloudflareZonesResp, err error) {
+func (cf *Cloudflare) getZones(domain *config.Domain) (result CloudflareZonesResp, err error) {
 	err = cf.request(
 		"GET",
 		fmt.Sprintf(zonesAPI+"?name=%s&status=%s&per_page=%s", domain.DomainName, "active", "50"),
@@ -114,7 +111,7 @@ func (cf *Cloudflare) getZones(domain *Domain) (result CloudflareZonesResp, err 
 }
 
 // Update
-func (cf *Cloudflare) modify(result CloudflareRecordsResp, zoneID string, domain *Domain, recordType string, ipAddr string) {
+func (cf *Cloudflare) modify(result CloudflareRecordsResp, zoneID string, domain *config.Domain, recordType string, ipAddr string) {
 	for _, record := range result.Result {
 		// 相同不修改
 		if record.Content == ipAddr {
@@ -141,7 +138,7 @@ func (cf *Cloudflare) modify(result CloudflareRecordsResp, zoneID string, domain
 }
 
 // create
-func (cf *Cloudflare) create(zoneID string, domain *Domain, recordType string, ipAddr string) {
+func (cf *Cloudflare) create(zoneID string, domain *config.Domain, recordType string, ipAddr string) {
 	record := &CloudflareRecord{
 		Name:    domain.String(),
 		Type:    recordType,
@@ -160,8 +157,10 @@ func (cf *Cloudflare) create(zoneID string, domain *Domain, recordType string, i
 
 	if err == nil && status.Success {
 		log.Printf(("新增%s记录成功！ IP：%s"), recordType, ipAddr)
+		domain.UpdateStatus = config.UpdatedSuccess
 	} else {
 		log.Printf(("新增%s记录失败！ IP：%s  Messages is %s"), recordType, ipAddr, status.Messages)
+		domain.UpdateStatus = config.UpdatedFail
 	}
 }
 

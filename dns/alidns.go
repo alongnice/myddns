@@ -11,13 +11,9 @@ import (
 
 // 阿里云DNS实现
 type Alidns struct {
-	client *alidnssdk.Client
-	Domains
+	client  *alidnssdk.Client
+	Domains config.Domains
 }
-
-// func (ali *Alidns) init(conf *config.Config) {
-// 	ali.Init(conf)
-// }
 
 // Init 初始化
 func (ali *Alidns) Init(conf *config.Config) {
@@ -33,20 +29,15 @@ func (ali *Alidns) Init(conf *config.Config) {
 }
 
 // 添加或者更新IPv4/IPv6记录
-func (ali *Alidns) AddUpdateDomainRecords() {
+func (ali *Alidns) AddUpdateDomainRecords() config.Domains {
 	ali.AddUpdateIpvDomainRecords("A")
 	ali.AddUpdateIpvDomainRecords("AAAA")
+	return ali.Domains
 }
 
 func (ali *Alidns) AddUpdateIpvDomainRecords(recordType string) {
-	typeName := "ipv4"
-	ipAddr := ali.Ipv4Addr
-	domains := ali.Ipv4Domains
-	if recordType == "AAAA" {
-		typeName = "ipv6"
-		ipAddr = ali.Ipv6Addr
-		domains = ali.Ipv6Domains
-	}
+	ipAddr, domains := ali.Domains.ParseDomainResult(recordType)
+
 	if ipAddr == "" {
 		return
 	}
@@ -59,6 +50,7 @@ func (ali *Alidns) AddUpdateIpvDomainRecords(recordType string) {
 		existReq.SubDomain = domain.GetFullDomain()
 		rep, err := ali.client.DescribeSubDomainRecords(existReq)
 		if err != nil {
+			domain.UpdateStatus = config.UpdatedFail
 			log.Println(err)
 		}
 		if rep.TotalCount > 0 {
@@ -77,9 +69,11 @@ func (ali *Alidns) AddUpdateIpvDomainRecords(recordType string) {
 
 				updateResp, err := ali.client.UpdateDomainRecord(request)
 				if err != nil || !updateResp.BaseResponse.IsSuccess() {
-					log.Println("更新ipv4记录错误！", typeName, " Domain: ", domain, " ip: ", ipAddr, "ERROR", err, "Response is", updateResp.GetHttpContentString())
+					log.Println("更新ipv4记录错误！ Domain: ", domain, " ip: ", ipAddr, "ERROR", err, "Response is", updateResp.GetHttpContentString())
+					domain.UpdateStatus = config.UpdatedFail
 				} else {
-					log.Println("更新ipv4记录成功！", typeName, " Domain: ", domain, " ip: ", ipAddr)
+					log.Println("更新ipv4记录成功！ Domain: ", domain, " ip: ", ipAddr)
+					domain.UpdateStatus = config.UpdatedSuccess
 				}
 				// if rep.TotalCount > 1 {
 				// 	log.Println(typeName, dom, "存在多条记录，只会更新第一条")
@@ -96,9 +90,9 @@ func (ali *Alidns) AddUpdateIpvDomainRecords(recordType string) {
 
 			createResp, err := ali.client.AddDomainRecord(request)
 			if err != nil {
-				log.Println("添加", typeName, " 错误，Domain: ", domain, " ip: ", ipAddr, "error is ", err, "createResp is ", createResp.GetHttpContentString())
+				log.Println("添加错误，Domain: ", domain, " ip: ", ipAddr, "error is ", err, "createResp is ", createResp.GetHttpContentString())
 			} else {
-				log.Println("添加", typeName, " 成功，Domain: ", domain, " ip: ", ipAddr)
+				log.Println("添加成功，Domain: ", domain, " ip: ", ipAddr)
 
 			}
 		}

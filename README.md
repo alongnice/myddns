@@ -62,22 +62,22 @@ docker run -d \
 - [可选] 使用IPV6后，建议设置登录用户名和密码
 
 ## Webhook
-- 支持webhook, 当IP变化, 会回调填写的URL
+- 支持webhook, 当IP更新成功或者失败, 会回调填写的URL
 - 支撑变量
   
 | 变量名 | 说明 |
 | ----- | ---- |
-| #{ipv4New}| 新的ipv4地址 |
-| #{ipv4Old}| 旧的ipv4地址 |
-| #{ipv6New}| 新的ipv6地址 |
-| #{ipv6Old}| 旧的ipv6地址 |
+| #{ipv4Addr}| 新的ipv4地址 |
+| #{ipv4Result}| IPv4地址的更新结果:`未改变` `失败` `成功` |
 | #{ipv4Domains}|Ipv4的域名,多个域名用逗号分隔 |
+| #{ipv6Addr}| 新的ipv6地址 |
+| #{ipv6Result}| IPv6地址的更新结果:`未改变` `失败` `成功` |
 | #{ipv6Domains}|Ipv6的域名,多个域名用逗号分隔 |
 
 - RequestBody 为空 GET 请求, 不为空 POST 请求
 - 示例
-- URL:  `https://sc.ftqq.com/[SCKEY].send?text=主人IP变了#{ipv4New}`
-- RequestBody:  `{"text":"你的IPv4已变为#{ipv4New}","desp":"域名有#{ipv4Domains}"}}`
+- 例(URL):  `https://sc.ftqq.com/[SCKEY].send?text=主人IPv4变了#{ipv4Addr},更新结果:#{ipv4Result}`
+- 例(RequestBody): `{"text":"你的IPv4已变为#{ipv4Addr}","desp":"更新结果: #{ipv4Result}"}`
 
 ---
 
