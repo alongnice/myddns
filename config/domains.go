@@ -158,12 +158,15 @@ func (domains *Domains) ExecWebhook(conf *Config) {
 		// 成功或者失败都触发webhook
 		method := "GET"
 		postPara := ""
-		if conf.DNS.Secret != "" {
+		contentType := "application/x-www-form-urlencoded"
+		if conf.WebhookRequestBody != "" {
 			method = "POST"
 			postPara = domains.replacePara(conf.WebhookRequestBody, v4Status, v6Status)
+			contentType = "application/json"
 		}
 		requestURL := domains.replacePara(conf.WebhookURL, v4Status, v6Status)
 		req, err := http.NewRequest(method, requestURL, strings.NewReader(postPara))
+		req.Header.Add("content-type", contentType)
 
 		clt := http.Client{}
 		clt.Timeout = 30 * time.Second
@@ -172,7 +175,7 @@ func (domains *Domains) ExecWebhook(conf *Config) {
 		if err == nil {
 			log.Println(fmt.Sprintf("webhook 被调用成功,返回数据: %s", string(body)))
 		} else {
-			log.Println("webhook 调用失败")
+			log.Println("webhook 调用失败", err)
 		}
 	}
 }
