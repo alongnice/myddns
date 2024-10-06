@@ -29,6 +29,8 @@ func main() {
 	http.HandleFunc("/", config.BasicAuth(web.Writing))
 	http.HandleFunc("/save", config.BasicAuth(web.Save))
 	http.HandleFunc("/logs", config.BasicAuth(web.Logs))
+	http.HandleFunc("/ipv4NetInterface", config.BasicAuth(web.IPv4NetInterface))
+	http.HandleFunc("/ipv6NetInterface", config.BasicAuth(web.IPv6NetInterface))
 
 	addr, err := net.ResolveTCPAddr("tcp", *listen)
 	if err != nil {

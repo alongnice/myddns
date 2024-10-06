@@ -30,14 +30,18 @@ type DNSConfig struct {
 // 配置结构体
 type Config struct {
 	Ipv4 struct {
-		Enable  bool
-		URL     string
-		Domains []string
+		Enable       bool
+		GetType      string
+		URL          string
+		NetInterface string
+		Domains      []string
 	}
 	Ipv6 struct {
-		Enable  bool
-		URL     string
-		Domains []string
+		Enable       bool
+		GetType      string
+		URL          string
+		NetInterface string
+		Domains      []string
 	}
 	DNS DNSConfig
 	User
@@ -113,6 +117,24 @@ func (conf *Config) SaveConfig() (err error) {
 func (conf *Config) GetIpv4Addr() (result string) {
 	// 从配置文件中读取ipv4地址
 	if conf.Ipv4.Enable {
+		// 判断从哪里获取ip
+		if conf.Ipv4.GetType == "netInterface" {
+			// 从网卡获取IP
+			ipv4, _, err := GetNetInterface()
+			if err != nil {
+				log.Println("获取ipv4地址失败")
+				return
+			}
+
+			for _, netInterface := range ipv4 {
+				if netInterface.Name == conf.Ipv4.NetInterface {
+					return netInterface.Address[0]
+				}
+			}
+			log.Println("从网卡中获取IPv4失败,网卡名:", conf.Ipv4.NetInterface)
+			return
+		}
+
 		resp, err := http.Get(conf.Ipv4.URL)
 		if err != nil {
 			// log.Println("获取ipv4地址失败")
@@ -135,6 +157,24 @@ func (conf *Config) GetIpv4Addr() (result string) {
 func (conf *Config) GetIpv6Addr() (result string) {
 	// 从配置文件中读取ipv6地址
 	if conf.Ipv6.Enable {
+		// 判断从哪里获取ip
+		if conf.Ipv4.GetType == "netInterface" {
+			// 从网卡获取IP
+			ipv4, _, err := GetNetInterface()
+			if err != nil {
+				log.Println("获取ipv4地址失败")
+				return
+			}
+
+			for _, netInterface := range ipv4 {
+				if netInterface.Name == conf.Ipv4.NetInterface {
+					return netInterface.Address[0]
+				}
+			}
+			log.Println("从网卡中获取IPv4失败,网卡名:", conf.Ipv4.NetInterface)
+			return
+		}
+
 		resp, err := http.Get(conf.Ipv4.URL)
 		if err != nil {
 			log.Println(fmt.Sprintf("未能获得IPV6地址! <a target='blank' href='%s'>点击查看接口能否返回IPV6地址</a>, 官方说明:<a target='blank' href='%s'>点击访问</a> ", conf.Ipv6.URL, "https://github.com/jeessy2/ddns-go#使用ipv6"))

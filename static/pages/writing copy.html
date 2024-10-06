@@ -28,15 +28,16 @@
       </div>
     </div>
   </header>
-  
+
   <main role="main" style="margin-top: 15px; overflow: hidden;">
     <div class="row">
       <div class="col-md-6 offset-md-3">
         <form>
           <button class="btn btn-primary submit_btn" style="margin-bottom: 15px;">Save</button>
-          <div class="alert alert-success" style="display: none;">
+          <div class="alert alert-success", style="display: none;">
             <strong id="resultMsg">保存成功</strong>
           </div>
+        <!-- </form> #@#-->
 
           <div class="portlet">
             <h5 class="portlet__head">DNS服务商</h5>
@@ -137,7 +138,7 @@
           <div class="portlet">
             <h5 class="portlet__head">IPV6</h5>
             <div class="portlet__body">
-              
+
               <div class="form-group row">
                 <label for="ipv6_enable" class="col-sm-2">是否启用</label>
                 <div class="col-sm-10">
@@ -180,12 +181,12 @@
           <div class="portlet">
             <h5 class="portlet__head">其他配置</h5>
             <div class="portlet__body">
-              
+
               <div class="form-group row">
                 <label for="Username" class="col-sm-2 col-form-label">登录用户名</label>
                 <div class="col-sm-10">
                   <input class="form-control" name="Username" id="Username" value="{{.Username}}" aria-describedby="Username_help">
-                  <small id="Username_help" class="form-text text-muted">为了信息安全, 建议输入</small>
+                  <small id="Username_help" class="form-text text-muted">为了安全,建议输入</small>
                 </div>
               </div>
 
@@ -193,23 +194,23 @@
                 <label for="Password" class="col-sm-2 col-form-label">登录密码</label>
                 <div class="col-sm-10">
                   <input class="form-control" type="password" name="Password" id="Password" value="{{.Password}}" aria-describedby="Password_help">
-                  <small id="Password_help" class="form-text text-muted">为了信息安全, 建议输入</small>
+                  <small id="Password_help" class="form-text text-muted">为了安全,建议输入</small>
                 </div>
               </div>
 
             </div>
           </div>
-
-          <div class="portlet">
+        
+          <div class="portlent">
             <h5 class="portlet__head">Webhook</h5>
             <div class="portlet__body">
-              
+
               <div class="form-group row">
                 <label for="WebhookURL" class="col-sm-2 col-form-label">URL</label>
-                <div class="col-sm-10">
+                <div clas="col-sm-10">
                   <input class="form-control" name="WebhookURL" id="WebhookURL" value="{{.WebhookURL}}" aria-describedby="WebhookURL_help">
                   <small id="WebhookURL_help" class="form-text text-muted">
-                    <a target="blank" href="https://github.com/jeessy2/ddns-go#webhook">点击参考官方Webhook说明</a><br/>
+                    <a target="blank" href="https://github.com/alongnice/myddns/README.md">点击参考官方Webhook说明</a><br/>
                     支持的变量#{ipv4Addr}, #{ipv4Result}, #{ipv4Domains}, #{ipv6Addr}, #{ipv6Result}, #{ipv6Domains}
                   </small>
                 </div>
@@ -219,15 +220,14 @@
                 <label for="WebhookRequestBody" class="col-sm-2 col-form-label">RequestBody</label>
                 <div class="col-sm-10">
                   <textarea class="form-control" id="WebhookRequestBody" name="WebhookRequestBody" rows="3" aria-describedby="WebhookRequestBody_help">
-{{- .WebhookRequestBody -}}
+{{- .Webhook.RequestBody -}}
                   </textarea>
                   <small id="WebhookRequestBody_help" class="form-text text-muted">
                     RequestBody为空GET请求，不为空POST请求。支持的变量同上
                   </small>
                 </div>
-              </div>
-
-            </div>
+                </div> 
+                </div>
           </div>
 
           <button class="btn btn-primary submit_btn" style="margin-bottom: 15px;">Save</button>
@@ -242,26 +242,25 @@
 
   <script>
     $(function(){
-      $(".submit_btn").on('click',function(e) {
+      $(".submit_btn").on('click', function(e){
         e.preventDefault();
         $('body').animate({ scrollTop: 0 }, 300);
         $.ajax({
           method: "POST",
           url: "/save",
           data: $('form').serialize(),
-          success: function (result) {
+          success: function(result){
             $('.alert').css("display", "block");
-            if (result !== "ok") {
+            if (result !== "ok"){
               $('.alert').addClass("alert-danger")
-              $('#resultMsg').html(result)
-            } else {
-              // ok
+              $('resultMsg').html(result)
+            }else{
               setTimeout(function(){
-                $('.alert').css("display", "none");
+                $('.alert').css("display", "none")
               }, 3000)
             }
           },
-          error: function(jqXHR) {
+          error: function(jqXHR){
             alert(jqXHR.statusText);
           }
         })
@@ -310,7 +309,11 @@
 
     var dnsName = '{{$.DNS.Name}}'
 
-    switch(dnsName){
+    switch (dnsName) {
+      // case "alidns": {
+      //   alidnsCheckedFun()
+      //   break;
+      // }
       case "dnspod": {
         dnspodCheckedFun()
         break;
@@ -331,16 +334,16 @@
     }
   </script>
 
-<script>
-  function getLogs() {
-    $.get("/logs", function(result){
-      $("#logs").html(result)
-    })
-  }
+  <script>
+    function getLogs() {
+      $.get("/logs", function(result){
+        $("#logs").html(result)
+      })
+    }
 
-  getLogs()
-  setInterval(getLogs, 5 * 1000)
-</script>
+    getLogs()
+    setInterval(getLogs, 5 * 1000)
+  </script>
 
 
 <script>
