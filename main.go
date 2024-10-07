@@ -81,6 +81,9 @@ func run(firstDelay time.Duration) {
 
 	log.Println("监听", *listen, "...")
 
+	// 没有配置,自动打开浏览器
+	autoOpenExplorer()
+
 	// 定时运行
 	go dns.RunTimer(firstDelay, time.Duration(*every)*time.Second)
 	err := http.ListenAndServe(*listen, nil)
@@ -152,10 +155,7 @@ func installService() {
 		if err = s.Install(); err == nil {
 			s.Start()
 			log.Println("安装 myddns 服务成功! 程序会一直运行, 包括重启后。")
-			url := OpenExplore()
-			if url != "" {
-				log.Printf("请在浏览器打开 %s 进行配置\n", url)
-			}
+			log.Println("不存在配置文件,请先在浏览器中进行配置。")
 			return
 		}
 		log.Printf("安装 myddns 服务失败, ERR: %s\n", err)
@@ -184,20 +184,24 @@ func installService() {
 }
 
 // 打开浏览器,理解为重载了 util/open_explore.go 中的实现
-func OpenExplore() string {
+func autoOpenExplorer() {
 	_, err := config.GetConfigCache()
-	// 未找到配置文件&&不是在docker中运行 才打开浏览器
-	if err != nil && !util.IsRunInDocker() {
-		addr, _ := net.ResolveTCPAddr("tcp", *listen)
-		if err != nil {
-			return ""
+	// 未找到配置文件
+	if err != nil {
+		if util.IsRunInDocker() {
+			// docker运行, 提示
+			fmt.Println("Docker中运行, 请在浏览器中打开 http://docker主机IP:端口 进行配置")
+		} else {
+			// 主机运行
+			addr, err := net.ResolveTCPAddr("tcp", *listen)
+			if err != nil {
+				return
+			}
+			url := fmt.Sprintf("http://127.0.0.1:%d", addr.Port)
+			if addr.IP.IsGlobalUnicast() {
+				url = fmt.Sprintf("http://%s", addr.String())
+			}
+			go util.OpenExplore(url)
 		}
-		url := fmt.Sprintf("http://127.0.0.1:%d", addr.Port)
-		if addr.IP.IsGlobalUnicast() {
-			url = fmt.Sprintf("http://%s", addr.String())
-		}
-		go util.OpenExplore(url)
-		return url
 	}
-	return ""
 }

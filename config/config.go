@@ -75,7 +75,6 @@ func GetConfigCache() (conf Config, err error) {
 	configFilePath := util.GetConfigFromFile()
 	_, err = os.Stat(configFilePath)
 	if err != nil {
-		log.Println("config.yaml 文件不存在,请输入配置文件")
 		cache.Err = err
 		return *cache.ConfigSingle, err
 	}
@@ -106,11 +105,14 @@ func (conf *Config) SaveConfig() (err error) {
 		return err
 	}
 
-	err = ioutil.WriteFile(util.GetConfigFromFile(), byt, 0600)
+	configFilePath := util.GetConfigFromFile()
+	err = ioutil.WriteFile(configFilePath, byt, 0600)
 	if err != nil {
 		log.Println(err)
 		return
 	}
+	log.Printf("配置文件已保存在: %s\n", configFilePath)
+
 	// 清空配置缓存
 	cache.ConfigSingle = nil
 

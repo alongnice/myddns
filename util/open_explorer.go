@@ -25,6 +25,6 @@ func OpenExplore(url string) {
 	if err != nil {
 		fmt.Println("浏览器打开失败:", err.Error(), "请手动打开;错误信息", url)
 	} else {
-		fmt.Println("浏览器打开成功")
+		fmt.Println("浏览器打开成功,记得在网页中进行配置")
 	}
 }
