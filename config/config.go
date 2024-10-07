@@ -10,6 +10,7 @@ import (
 	"os"
 	"regexp"
 	"sync"
+	"time"
 
 	"gopkg.in/yaml.v2"
 )
@@ -137,7 +138,8 @@ func (conf *Config) GetIpv4Addr() (result string) {
 			return
 		}
 
-		resp, err := http.Get(conf.Ipv4.URL)
+		client := http.Client{Timeout: 10 * time.Second}
+		resp, err := client.Get(conf.Ipv4.URL)
 		if err != nil {
 			// log.Println("获取ipv4地址失败")
 			log.Println(fmt.Sprintf("未能获得IPV4地址! <a target='blank' href='%s'>点击查看接口能否返回IPV4地址</a>,", conf.Ipv4.URL))
@@ -177,7 +179,8 @@ func (conf *Config) GetIpv6Addr() (result string) {
 			return
 		}
 
-		resp, err := http.Get(conf.Ipv4.URL)
+		client := http.Client{Timeout: 10 * time.Second}
+		resp, err := client.Get(conf.Ipv6.URL)
 		if err != nil {
 			log.Println(fmt.Sprintf("未能获得IPV6地址! <a target='blank' href='%s'>点击查看接口能否返回IPV6地址</a>, 官方说明:<a target='blank' href='%s'>点击访问</a> ", conf.Ipv6.URL, "https://github.com/alongnice/myddns#使用ipv6"))
 		}

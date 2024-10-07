@@ -151,10 +151,9 @@ func (ali *Alidns) request(params url.Values, result interface{}) (err error) {
 	}
 
 	// 创建一个http.Client，设置超时时间为30秒
-	clt := http.Client{}
-	clt.Timeout = 30 * time.Second
+	client := http.Client{Timeout: 10 * time.Second}
 	// 发送请求，获取响应
-	resp, err := clt.Do(req)
+	resp, err := client.Do(req)
 	// 使用util包中的GetHTTPResponse函数处理响应，并将结果保存到result中
 	err = util.GetHTTPResponse(resp, alidnsEndpoint, err, result)
 

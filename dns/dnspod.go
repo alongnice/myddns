@@ -6,6 +6,7 @@ import (
 	"myddns/util"
 	"net/http"
 	"net/url"
+	"time"
 )
 
 const (
@@ -162,7 +163,8 @@ func (dnspod *Dnspod) getRecordList(domain *config.Domain, typ string) (result D
 	// 	values.Add("Sub_domain", "@")
 	// }
 
-	resp, err := http.PostForm(
+	client := http.Client{Timeout: 10 * time.Second}
+	resp, err := client.PostForm(
 		recordListAPI,
 		values,
 		// url.Values{

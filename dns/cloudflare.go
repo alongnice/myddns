@@ -78,7 +78,6 @@ func (cf *Cloudflare) AddUpdateIpvDomainRecords(recordType string) {
 		// get zone 获得域
 		result, err := cf.getZones(domain)
 		if err != nil || len(result.Result) != 1 {
-			domain.UpdateStatus = config.UpdatedFail
 			return
 		}
 		zoneID := result.Result[0].ID
@@ -182,9 +181,10 @@ func (cf *Cloudflare) request(method string, url string, data interface{}, resul
 	req.Header.Set("Authorization", "Bearer"+cf.DNSConfig.Secret)
 	req.Header.Set("Content-Type", "application/json")
 
-	clt := http.Client{}
-	clt.Timeout = 30 * time.Second
-	resp, err := clt.Do(req)
+	// 创建一个http.Client，设置超时时间为30秒
+	client := http.Client{Timeout: 10 * time.Second}
+	// 发送请求，获取响应
+	resp, err := client.Do(req)
 	err = util.GetHTTPResponse(resp, url, err, result)
 
 	return nil

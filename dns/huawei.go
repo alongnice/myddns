@@ -185,9 +185,8 @@ func (hw *Huaweicloud) request(method string, url string, data interface{}, resu
 	s.Sign(req)
 	req.Header.Add("content-type", "application/json")
 
-	clt := http.Client{}
-	clt.Timeout = 30 * time.Second
-	resp, err := clt.Do(req)
+	client := http.Client{Timeout: 10 * time.Second}
+	resp, err := client.Do(req)
 	err = util.GetHTTPResponse(resp, url, err, result)
 	return
 }

@@ -100,6 +100,7 @@ func (p *program) Start(s service.Service) error {
 	return nil
 }
 func (p *program) run() {
+	log.Printf("以服务方式运行中,配置文件地址: %s\n", util.GetConfigFromFile())
 	// 延时运行等待网络
 	run(10 * time.Second)
 }
