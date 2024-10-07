@@ -1,2 +1,33 @@
-__debug_bin
+# 过程文件
+*.o
+*.a
+*.so
+/ddns-go
+__*
+
+# 文件夹
+_obj
+_test
+.vagrant
+releases
+tmp
+/.idea/
+vendor/
+/dist
+
+# 二进制文件
+trace.out
+*.out
 .DS_Store
+_testmain.go
+
+*.exe
+*.test
+*.prof
+profile.cov
+coverage.html
+/go.sum
+
+# emacs 带来的过程文件或者回退文件
+*~
+.*~

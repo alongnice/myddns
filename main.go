@@ -3,7 +3,7 @@ package main
 import (
 	"myddns/config"
 	"myddns/dns"
-	"myddns/static"
+	static "myddns/static"
 	"myddns/util"
 	"myddns/web"
 

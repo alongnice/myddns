@@ -18,19 +18,6 @@
 + 华为云
 + webhook
 
-## 依赖
-
-```
- go get -u github.com/go-bindata/go-bindata/...
- go-bindata -debug -pkg util -o util/staticPagesData.go static/pages/...
- go-bindata -pkg static -o static/js_css_data.go -fs -prefix "static/" static/
-```
-## 发布
-
-```
-go-bindata -pkg util -o util/staticPagesData.go static/pages/...
-go-bindata -pkg static -o static/js_css_data.go -fs -prefix "static/" static/
-```
 
 ## 普通环境使用
 
@@ -50,6 +37,14 @@ docker run -d \
     -p 12138:12138
     alongnice/myddns
 ```
+
+## 自行构建
+
++ 从源码构建。先安装 bindata（或者简单使用 `make init`）：
++ `make dev` 动态加载修改后的`wtiting.html`
++ `make build` 构建本地编译版本的 `ddns-go` 可执行文件。
++ `make build_docker_image` 本地自动化编译、打包 Docker 镜像。
+
 
 ## 使用 IPV6
 
