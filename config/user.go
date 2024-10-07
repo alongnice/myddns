@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/base64"
 	"log"
+	"myddns/util"
 	"net/http"
 	"strings"
 )
@@ -22,6 +23,15 @@ func BasicAuth(f ViewFunc) ViewFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// 账号或密码为空跳过
 		conf, _ := GetConfigCache()
+
+		// 禁止从公网访问
+		if conf.NotAllowWanAccess {
+			if !util.IsPrivateNetwork(r.RemoteAddr) {
+				w.WriteHeader(http.StatusBadGateway)
+				return
+			}
+		}
+
 		if conf.Username == "" && conf.Password == "" {
 			// 执行被装饰的函数
 			f(w, r)

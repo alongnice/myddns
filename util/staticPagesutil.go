@@ -18,7 +18,6 @@ func GetStaticResourcePath(orgPath string) (temPath string, err error) {
 		return "", err
 	}
 	// tempFile := os.TempDir() + strings.ReplaceAll(orgPath, "/", "/")
-	fmt.Println(orgPath)
 	tempFile := strings.ReplaceAll(orgPath, "/", "/")
 	// ioutil.WriteFile(tempFile, data, 0600)
 	ioutil.WriteFile(temPath, data, 0600)

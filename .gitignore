@@ -2,7 +2,7 @@
 *.o
 *.a
 *.so
-/ddns-go
+/myddns
 __*
 
 # 文件夹

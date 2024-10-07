@@ -49,6 +49,8 @@ func Writing(writer http.ResponseWriter, request *http.Request) {
 	if conf.DNS.Name == "" {
 		conf.DNS.Name = "alidns"
 	}
+	// 禁止公网访问
+	conf.NotAllowWanAccess = true
 
 	tmpl.Execute(writer, conf)
 }
