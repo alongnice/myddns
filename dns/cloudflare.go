@@ -8,6 +8,7 @@ import (
 	"myddns/config"
 	"myddns/util"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -19,6 +20,7 @@ const (
 type Cloudflare struct {
 	DNSConfig config.DNSConfig
 	Domains   config.Domains
+	TTL       int
 }
 
 // CloudflareStatus 公共状态
@@ -58,6 +60,16 @@ type CloudflareZonesResp struct {
 func (cf *Cloudflare) Init(conf *config.Config) {
 	cf.DNSConfig = conf.DNS
 	cf.Domains.ParseDomain(conf)
+	if conf.TTL == "" {
+		cf.TTL = 1
+	} else {
+		ttl, err := strconv.Atoi(conf.TTL)
+		if err != nil {
+			cf.TTL = 1
+		} else {
+			cf.TTL = ttl
+		}
+	}
 }
 
 // 添加或者更新IPv4/IPv6记录
@@ -120,6 +132,7 @@ func (cf *Cloudflare) modify(result CloudflareRecordsResp, zoneID string, domain
 
 		var status CloudflareStatus
 		record.Content = ipAddr
+		record.TTL = cf.TTL
 
 		err := cf.request(
 			"PUT",
@@ -142,7 +155,7 @@ func (cf *Cloudflare) create(zoneID string, domain *config.Domain, recordType st
 		Name:    domain.String(),
 		Type:    recordType,
 		Content: ipAddr,
-		TTL:     1,
+		TTL:     cf.TTL,
 		Proxied: false,
 	}
 

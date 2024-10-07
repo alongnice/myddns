@@ -49,6 +49,7 @@ type Config struct {
 	Webhook
 	// 禁止从公网访问
 	NotAllowWanAccess bool
+	TTL               string
 }
 
 // 配置缓存

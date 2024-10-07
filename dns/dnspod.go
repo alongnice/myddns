@@ -15,10 +15,12 @@ const (
 	recordCreateAPi string = "https://dnsapi.cn/Record.Create"
 )
 
+// https://cloud.tencent.com/document/api/302/8516
 // Dnspod 腾讯云DNS实现
 type Dnspod struct {
 	DNSConfig config.DNSConfig
 	Domains   config.Domains
+	TTL       string
 }
 
 // 腾讯云返回状态码
@@ -45,6 +47,11 @@ type DnspodRecordListResp struct {
 func (dnspod *Dnspod) Init(conf *config.Config) {
 	dnspod.DNSConfig = conf.DNS
 	dnspod.Domains.ParseDomain(conf)
+	if conf.TTL == "" {
+		dnspod.TTL = "600"
+	} else {
+		dnspod.TTL = conf.TTL
+	}
 }
 
 // 添加或者更新IPv4/IPv6记录
@@ -89,6 +96,7 @@ func (dnspod *Dnspod) create(result DnspodRecordListResp, domain *config.Domain,
 			"sub_domain":  {domain.GetSubDomain()},
 			"record_type": {"默认"},
 			"value":       {ipAddr},
+			"ttl":         {dnspod.TTL},
 			"format":      {"json"},
 		},
 		domain,
@@ -123,6 +131,7 @@ func (dnspod *Dnspod) modify(result DnspodRecordListResp, domain *config.Domain,
 				"record_id":   {record.ID},
 				"value":       {ipAddr},
 				"format":      {"json"},
+				"ttl":         {dnspod.TTL},
 			},
 			domain,
 		)
