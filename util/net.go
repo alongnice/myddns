@@ -45,11 +45,6 @@ func IsPrivateNetwork(remoteAddr string) bool {
 			return true
 		}
 
-		_, ipNet100, _ := net.ParseCIDR("100.0.0.0/8")
-		if ipNet100.Contains(ip) {
-			return true
-		}
-
 		_, ipNetFE, _ := net.ParseCIDR("fe80::/10")
 		if ipNetFE.Contains(ip) {
 			return true
@@ -62,5 +57,9 @@ func IsPrivateNetwork(remoteAddr string) bool {
 
 	}
 
+	// localhost
+	if remoteAddr == "localhost" {
+		return true
+	}
 	return false
 }

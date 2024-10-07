@@ -3,18 +3,13 @@ module myddns
 go 1.23.0
 
 require (
-	github.com/aliyun/alibaba-cloud-sdk-go v1.63.17
+	github.com/kardianos/service v1.2.2
 	gopkg.in/yaml.v2 v2.4.0
 )
 
 require (
-	github.com/go-bindata/go-bindata v3.1.2+incompatible // indirect
-	github.com/jmespath/go-jmespath v0.4.0 // indirect
-	github.com/json-iterator/go v1.1.12 // indirect
-	github.com/kardianos/service v1.2.2 // indirect
-	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
-	github.com/modern-go/reflect2 v1.0.2 // indirect
-	github.com/opentracing/opentracing-go v1.2.1-0.20220228012449-10b1cf09e00b // indirect
+	github.com/kr/text v0.2.0 // indirect
+	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
 	golang.org/x/sys v0.0.0-20201015000850-e3ed0017c211 // indirect
-	gopkg.in/ini.v1 v1.67.0 // indirect
+	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f // indirect
 )
