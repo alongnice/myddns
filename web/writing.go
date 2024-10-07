@@ -1,22 +1,19 @@
 package web
 
 import (
+	"embed"
 	"fmt"
-	"log"
 	"myddns/config"
-	"myddns/util"
 	"net/http"
 	"strings"
 	"text/template"
 )
 
+//go:embed writing.html
+var writingEmbedFile embed.FS
+
 func Writing(writer http.ResponseWriter, request *http.Request) {
-	tempPath, err := util.GetStaticResourcePath("static/pages/writing.html")
-	if err != nil {
-		log.Println(tempPath, "Asset 没找到.")
-		return
-	}
-	tmpl, err := template.ParseFiles(tempPath)
+	tmpl, err := template.ParseFS(writingEmbedFile, "writing.html")
 	if err != nil {
 		fmt.Println("Error 发生..")
 		fmt.Println(err)

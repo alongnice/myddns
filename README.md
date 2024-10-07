@@ -44,8 +44,7 @@
 
 ## 自行构建
 
-+ 从源码构建。先安装 bindata（或者简单使用 `make init`）：
-+ `make dev` 动态加载修改后的`wtiting.html`
+> 开发环境 golang 1.16
 + `make build` 构建本地编译版本的 `myddns` 可执行文件。
 + `make build_docker_image` 本地自动化编译、打包 Docker 镜像。
 
@@ -66,7 +65,7 @@
 docker run -d \
     --name myddns \
     --restart=always \
-    -v /opt/myddns:/root
+    -v /opt/myddns:/root \
     --net=host \
     alongnice/myddns
 ```

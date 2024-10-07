@@ -1,9 +1,9 @@
 package main
 
 import (
+	"embed"
 	"myddns/config"
 	"myddns/dns"
-	static "myddns/static"
 	"myddns/util"
 	"myddns/web"
 
@@ -17,14 +17,20 @@ import (
 	"time"
 )
 
+//go:embed static
+var staticEmbededFiles embed.FS
+
+//go:embed favicon.ico
+var faviconEmbededFile embed.FS
+
 func main() {
 	listen := flag.String("l", ":12138", "web server listen address")
 	every := flag.String("f", "300", "dns update frequency in second")
 	flag.Parse()
 
 	// 启动静态文件服务
-	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(static.AssetFile())))
-	http.Handle("/favicon.ico", http.StripPrefix("/", http.FileServer(static.AssetFile())))
+	http.Handle("/static/", http.FileServer(http.FS(staticEmbededFiles)))
+	http.Handle("/favicon.ico", http.FileServer(http.FS(faviconEmbededFile)))
 
 	http.HandleFunc("/", config.BasicAuth(web.Writing))
 	http.HandleFunc("/save", config.BasicAuth(web.Save))

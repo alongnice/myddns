@@ -22,9 +22,6 @@ build_docker_image:
 	@$(DOCKER_CMD) build -f ./Dockerfile -t ddns-go:$(VERSION) .
 # 构建docker镜像
 
-init:
-	@go get -u github.com/go-bindata/go-bindata/...
-# 初始化
 
 test:
 	@$(GO) test ./...
@@ -32,15 +29,6 @@ test:
 
 test-race:
 	@$(GO) test -race ./...
-
-bindata:
-	@go-bindata -pkg util -o util/staticPages.go static/pages/...
-	@go-bindata -pkg asserts -o asserts/html.go -prefix "static/" static/
-
-# 嵌套静态资源到go代码中
-dev:
-	@go-bindata -debug -pkg util -o util/staticPages.go static/pages/...
-# 调试版本静态资源嵌套
 
 # clean all build result
 clean:
