@@ -26,8 +26,7 @@ var mlogs = &memLogs{MaxNum: 50}
 
 // 初始化日志
 func init() {
-	log.SetOutput(io.MultiWriter(os.Stdout, mlogs))
-	// 日志设置输出, 输出到控制台, 输出到内存
+	log.SetOutput(io.MultiWriter(mlogs, os.Stdout))
 }
 
 // logs web
