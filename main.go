@@ -21,10 +21,13 @@ import (
 )
 
 // 监听地址
-var listen = flag.String("l", ":12138", "web server listen address")
+var listen = flag.String("l", ":12138", "监听地址")
 
 // 更新频率
-var every = flag.Int("f", 300, "dns update frequency in second")
+var every = flag.Int("f", 300, "同步间隔时间(秒)")
+
+// 服务类别
+var serviceType = flag.String("s", "", "服务管理, 支持install, uninstall")
 
 //go:embed static
 var staticEmbededFiles embed.FS
@@ -37,14 +40,35 @@ func main() {
 	if _, err := net.ResolveTCPAddr("tcp", *listen); err != nil {
 		log.Fatalf("解析监听地址异常，%s", err)
 	}
-	if util.IsRunInDocker() {
-		run()
-	} else {
-		runAsService()
+	switch *serviceType {
+	case "install":
+		installService()
+	case "uninstall":
+		uninstallService()
+	default:
+		if util.IsRunInDocker() {
+			run(100 * time.Millisecond)
+		} else {
+			s := getService()
+			status, _ := s.Status()
+			if status != service.StatusUnknown {
+				// 以服务方式运行
+				s.Run()
+			} else {
+				// 非服务方式运行
+				switch s.Platform() {
+				case "windows-service":
+					log.Println("可使用 .\\myddns.exe -s install 安装服务运行")
+				default:
+					log.Println("可使用 sudo ./myddns -s install 安装服务运行")
+				}
+				run(100 * time.Millisecond)
+			}
+		}
 	}
 }
 
-func run() {
+func run(firstDelay time.Duration) {
 	// 启动静态文件服务
 	http.Handle("/static/", http.FileServer(http.FS(staticEmbededFiles)))
 	http.Handle("/favicon.ico", http.FileServer(http.FS(faviconEmbededFile)))
@@ -58,7 +82,7 @@ func run() {
 	log.Println("监听", *listen, "...")
 
 	// 定时运行
-	go dns.RunTimer(time.Duration(*every) * time.Second)
+	go dns.RunTimer(firstDelay, time.Duration(*every)*time.Second)
 	err := http.ListenAndServe(*listen, nil)
 
 	if err != nil {
@@ -68,8 +92,6 @@ func run() {
 	}
 }
 
-var logger service.Logger
-
 type program struct{}
 
 func (p *program) Start(s service.Service) error {
@@ -78,8 +100,8 @@ func (p *program) Start(s service.Service) error {
 	return nil
 }
 func (p *program) run() {
-	// Do work here
-	run()
+	// 延时运行等待网络
+	run(10 * time.Second)
 }
 func (p *program) Stop(s service.Service) error {
 	// Stop should not block. Return with a few seconds.
@@ -87,7 +109,7 @@ func (p *program) Stop(s service.Service) error {
 }
 
 // 以服务方式运行
-func runAsService() {
+func getService() service.Service {
 	svcConfig := &service.Config{
 		Name:        "myddns",
 		DisplayName: "myddns",
@@ -100,81 +122,81 @@ func runAsService() {
 	if err != nil {
 		log.Fatalln(err)
 	}
+	return s
+}
 
+// 卸载服务
+func uninstallService() {
+	s := getService()
+	status, _ := s.Status()
 	// 处理卸载
-	if len(os.Args) > 1 {
-		switch os.Args[1] {
-		case "uninstall":
-			s.Stop()
-			if err = s.Uninstall(); err == nil {
-				log.Println("myddns 服务卸载成功!")
-			} else {
-				log.Printf("myddns 服务卸载失败, ERR: %s\n", err)
-				switch s.Platform() {
-				case "windows-service":
-					log.Println("请以管理员身份运行cmd并确保使用如下命令: .\\myddns.exe uninstall")
-				default:
-					log.Println("请确保使用如下命令: sudo ./myddns uninstall")
-				}
-			}
-			return
+	if status != service.StatusUnknown {
+		s.Stop()
+		if err := s.Uninstall(); err == nil {
+			log.Println("myddns 服务卸载成功!")
+		} else {
+			log.Printf("myddns 服务卸载失败, ERR: %s\n", err)
 		}
+	} else {
+		log.Printf("myddns 服务未安装")
 	}
+}
 
-	logger, err = s.Logger(nil)
-	if err != nil {
-		log.Fatal(err)
-	}
-
+// 安装服务
+func installService() {
+	s := getService()
 	status, err := s.Status()
 	if err != nil && status == service.StatusUnknown {
 		// 服务未知，创建服务
 		if err = s.Install(); err == nil {
 			s.Start()
-			openExplorer()
 			log.Println("安装 myddns 服务成功! 程序会一直运行, 包括重启后。")
-			switch s.Platform() {
-			case "windows-service":
-				log.Println("如需卸载 myddns, 请以管理员身份运行cmd并确保使用如下命令: .\\myddns.exe uninstall")
-			default:
-				log.Println("如需卸载 myddns, 请确保使用如下命令: sudo ./myddns uninstall")
+			url := OpenExplore()
+			if url != "" {
+				log.Printf("请在浏览器打开 %s 进行配置\n", url)
 			}
-			log.Println("请在浏览器中进行配置。1分钟后自动关闭DOS窗口!")
-			time.Sleep(time.Minute)
 			return
 		}
-
 		log.Printf("安装 myddns 服务失败, ERR: %s\n", err)
+
 		switch s.Platform() {
 		case "windows-service":
-			log.Println("请以管理员身份运行cmd并确保使用如下命令: .\\myddns.exe")
+			log.Println("如需卸载 myddns, 请以管理员身份运行cmd并确保使用如下命令: .\\myddns.exe uninstall")
 		default:
-			log.Println("请确保使用如下命令: sudo ./myddns")
+			log.Println("如需卸载 myddns, 请确保使用如下命令: sudo ./myddns uninstall")
 		}
+		log.Println("请在浏览器中进行配置。1分钟后自动关闭DOS窗口!")
+		time.Sleep(time.Minute)
+		return
 	}
 
-	// 正常启动
-	s.Run()
-	if err != nil {
-		logger.Error(err)
+	log.Printf("安装 myddns 服务失败, ERR: %s\n", err)
+	switch s.Platform() {
+	case "windows-service":
+		log.Println("请以管理员身份运行cmd并确保使用如下命令: .\\myddns.exe -s install")
+	default:
+		log.Println("请确保使用如下命令: sudo ./myddns -s install")
 	}
-
+	if status != service.StatusUnknown {
+		log.Println("myddns 服务已安装, 无需在次安装")
+	}
 }
 
-func openExplorer() {
+// 打开浏览器,理解为重载了 util/open_explore.go 中的实现
+func OpenExplore() string {
 	_, err := config.GetConfigCache()
 	// 未找到配置文件&&不是在docker中运行 才打开浏览器
 	if err != nil && !util.IsRunInDocker() {
-		addr, err := net.ResolveTCPAddr("tcp", *listen)
+		addr, _ := net.ResolveTCPAddr("tcp", *listen)
 		if err != nil {
-			return
+			return ""
 		}
-		url := ""
+		url := fmt.Sprintf("http://127.0.0.1:%d", addr.Port)
 		if addr.IP.IsGlobalUnicast() {
 			url = fmt.Sprintf("http://%s", addr.String())
-		} else {
-			url = fmt.Sprintf("http://127.0.0.1:%d", addr.Port)
 		}
 		go util.OpenExplore(url)
+		return url
 	}
+	return ""
 }

@@ -63,7 +63,6 @@ func (dnspod *Dnspod) AddUpdateIpvDomainRecords(recordType string) {
 	for _, domain := range domains {
 		result, err := dnspod.getRecordList(domain, recordType)
 		if err != nil {
-			domain.UpdateStatus = config.UpdatedFail
 			return
 		}
 

@@ -42,7 +42,8 @@ func RunOnce() {
 }
 
 // RunTimer 定时运行
-func RunTimer(delay time.Duration) {
+func RunTimer(firstDelay time.Duration, delay time.Duration) {
+	time.Sleep(firstDelay)
 	for {
 		RunOnce()
 		time.Sleep(delay)
