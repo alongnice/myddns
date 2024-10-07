@@ -2,10 +2,10 @@ package util
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
-	"fmt"
 )
 
 // 获得并简单解析 http 接口返回json结果
@@ -25,7 +25,7 @@ func GetHTTPResponseOrg(resp *http.Response, url string, err error) ([]byte, err
 	if err != nil {
 		log.Println("接口请求", url, " 失败： ", err)
 		return nil, err
-	} 
+	}
 
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
@@ -33,11 +33,11 @@ func GetHTTPResponseOrg(resp *http.Response, url string, err error) ([]byte, err
 	if err != nil {
 		log.Println("接口请求 失败： ", err, "URL", url)
 	}
-	if resp.StatusCode != 200 && resp.StatusCode != 202 {
-		log.Printf("请求接口 %s 失败! %s \n",url, string(body))
-		err = fmt.Errorf("请求接口 %s 失败! %s \n",url, string(body))
+	if resp.StatusCode >= 300 {
+		errMsg := fmt.Sprintf("请求接口 %s 失败! %s \n 返回状态码", url, string(body), resp.StatusCode)
+		log.Printf(errMsg)
+		err = fmt.Errorf(errMsg)
 	}
-	
 
 	return body, err
 }
