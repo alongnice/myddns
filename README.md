@@ -23,26 +23,30 @@
 
 - 下载[https://github.com/alongnice/myddns/releases](https://github.com/alongnice/myddns/releases)
 - 运行，程序将自行打开浏览器，访问 [http://127.0.0.1:12138](http://127.0.0.1:12138)完成配置修改
-- [可选] 支持启动带参数 `-l`监听地址 `-f`间隔时间（秒）。如：`./ddns-go -l 127.0.0.1:9876 -f 300` 
+- [可选] 支持启动带参数 `-l`监听地址 `-f`间隔时间（秒）。如：`./myddns -l 127.0.0.1:9876 -f 300` 
 
 
 
 
 ## Docker使用
 
-```bash
-docker run -d \
-    --name myddns \ 
-    --restart=always \
-    -p 12138:12138
-    alongnice/myddns
-```
+- 挂载主机目录, 删除容器后配置不会丢失。可替换 `/opt/myddns` 为主机上的任意目录, 配置文件为隐藏文件
+
+  ```bash
+  docker run -d --name myddns --restart=always -p 9876:9876 -v /opt/myddns:/root alongnice/myddns
+  ```
+
+- 不挂载主机目录, 删除容器同时会删除配置
+
+  ```bash
+  docker run -d --name myddns --restart=always -p 9876:9876 alongnice/myddns
+  ```
 
 ## 自行构建
 
 + 从源码构建。先安装 bindata（或者简单使用 `make init`）：
 + `make dev` 动态加载修改后的`wtiting.html`
-+ `make build` 构建本地编译版本的 `ddns-go` 可执行文件。
++ `make build` 构建本地编译版本的 `myddns` 可执行文件。
 + `make build_docker_image` 本地自动化编译、打包 Docker 镜像。
 
 
@@ -54,12 +58,15 @@ docker run -d \
     - 
     - 群晖：
       - 套件中心下载docker并打开
-      - 注册表中搜索`ddns-go`并下载
-      - 映像 -> 选择`jeessy/ddns-go` -> 启动 -> 高级设置 -> 网络中勾选`使用与 Docker Host 相同的网络`，高级设置中勾选`启动自动重新启动`
+      - 注册表中搜索`myddns`并下载
+      - 映像 -> 选择`alongnice/myddns` -> 启动 -> 高级设置 -> 网络中勾选`使用与 Docker Host 相同的网络`，高级设置中勾选`启动自动重新启动`
+      - 在浏览器中打开`http://群晖IP:9876`，修改你的配置，成功
+
 ```bash
 docker run -d \
     --name myddns \
     --restart=always \
+    -v /opt/myddns:/root
     --net=host \
     alongnice/myddns
 ```

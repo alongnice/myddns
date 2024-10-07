@@ -21,5 +21,5 @@ ENV TZ=Asia/Shanghai
 COPY --from=builder /app/myddns /app/myddns
 EXPOSE 12138
 ENTRYPOINT /app/myddns
-
-# alpine 是使用alpine作为基础镜像 是非常小的linux发行版 减小docker生成出img的大小
+CMD ["-l", ":9876", "-f", "300"] 
+#可选参数

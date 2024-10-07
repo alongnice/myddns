@@ -177,7 +177,7 @@ func (conf *Config) GetIpv6Addr() (result string) {
 
 		resp, err := http.Get(conf.Ipv4.URL)
 		if err != nil {
-			log.Println(fmt.Sprintf("未能获得IPV6地址! <a target='blank' href='%s'>点击查看接口能否返回IPV6地址</a>, 官方说明:<a target='blank' href='%s'>点击访问</a> ", conf.Ipv6.URL, "https://github.com/jeessy2/ddns-go#使用ipv6"))
+			log.Println(fmt.Sprintf("未能获得IPV6地址! <a target='blank' href='%s'>点击查看接口能否返回IPV6地址</a>, 官方说明:<a target='blank' href='%s'>点击访问</a> ", conf.Ipv6.URL, "https://github.com/alongnice/myddns#使用ipv6"))
 		}
 		defer resp.Body.Close()
 		// body, err := ioutill.ReadFile(resp.Body)
