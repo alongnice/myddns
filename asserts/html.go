@@ -7,7 +7,7 @@
 // static/js_css_data.go
 // DO NOT EDIT!
 
-package static
+package asserts
 
 import (
 	"bytes"
@@ -87,7 +87,7 @@ func bootstrapMinCss() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "bootstrap.min.css", size: 160392, mode: os.FileMode(436), modTime: time.Unix(1728289117, 0)}
+	info := bindataFileInfo{name: "bootstrap.min.css", size: 160392, mode: os.FileMode(436), modTime: time.Unix(1728290429, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

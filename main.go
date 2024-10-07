@@ -47,7 +47,7 @@ func main() {
 
 	// 新建协程,打开浏览器
 	_, err = config.GetConfigCache()
-	if err != nil {
+	if err != nil && !util.IsRunInDocker() {
 		go util.OpenExplore(url)
 	}
 	log.Println("监听", *listen, "...")

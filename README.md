@@ -30,7 +30,7 @@
 
 ## Docker使用
 
-```
+```bash
 docker run -d \
     --name myddns \ 
     --restart=always \
@@ -56,7 +56,7 @@ docker run -d \
       - 套件中心下载docker并打开
       - 注册表中搜索`ddns-go`并下载
       - 映像 -> 选择`jeessy/ddns-go` -> 启动 -> 高级设置 -> 网络中勾选`使用与 Docker Host 相同的网络`，高级设置中勾选`启动自动重新启动`
-```
+```bash
 docker run -d \
     --name myddns \
     --restart=always \

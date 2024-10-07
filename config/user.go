@@ -3,6 +3,7 @@ package config
 import (
 	"bytes"
 	"encoding/base64"
+	"log"
 	"net/http"
 	"strings"
 )
@@ -49,11 +50,12 @@ func BasicAuth(f ViewFunc) ViewFunc {
 					return
 				}
 			}
+			log.Printf("%s:认证失败", r.RemoteAddr)
 		}
 		// 认证失败
 		w.Header().Set("WWW-Authenticate", `Basic realm="Restricted"`)
 		// 401 状态码(无权限)
 		w.WriteHeader(http.StatusUnauthorized)
-
+		log.Printf("%s:请求登录", r.RemoteAddr)
 	}
 }

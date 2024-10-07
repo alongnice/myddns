@@ -14,11 +14,11 @@ GOROOT=$(shell `which go` env GOROOT)
 GOPATH=$(shell `which go` env GOPATH)
 # go语言环境参数
 
-build: bindata $(DIR_SRC)/main.go
+build: $(DIR_SRC)/main.go
 	@$(GO) build $(GO_FLAGS) -o $(BIN) $(DIR_SRC)
 # 编译
 
-build_docker_image: clean
+build_docker_image: 
 	@$(DOCKER_CMD) build -f ./Dockerfile -t ddns-go:$(VERSION) .
 # 构建docker镜像
 
@@ -35,7 +35,7 @@ test-race:
 
 bindata:
 	@go-bindata -pkg util -o util/staticPages.go static/pages/...
-	@go-bindata -pkg static -o asserts/html.go -prefix "static/" static/
+	@go-bindata -pkg asserts -o asserts/html.go -prefix "static/" static/
 
 # 嵌套静态资源到go代码中
 dev:
@@ -44,7 +44,6 @@ dev:
 
 # clean all build result
 clean:
-	@rm -f util/staticPages.go asserts/html.go
 	@$(GO) clean ./...
 	@rm -f $(BIN)
 	@rm -rf ./dist/*
