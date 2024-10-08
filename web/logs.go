@@ -37,3 +37,9 @@ func Logs(writer http.ResponseWriter, request *http.Request) {
 	}
 
 }
+
+// clear logs
+func ClearLog(writer http.ResponseWriter, request *http.Request) {
+	mlogs.Logs = []string{}
+	writer.Write([]byte("日志已清空"))
+}

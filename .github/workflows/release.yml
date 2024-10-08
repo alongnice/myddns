@@ -9,23 +9,20 @@ on:
 
 jobs:
 # 工作内容如下
-  build:
+  goreleaser:
     name: Build
     runs-on: ubuntu-latest
     steps:
-    # 构建一个名为 Build 的步骤，使用环境在最新版本 ubuntu上运行
-    - name: Set up Go 1.x
-      uses: actions/setup-go@v2
-      with:
-        go-version: ^1.16
-      id: go
-      # 设置go的版本为1.16
-      
-    - name: Check out code into the Go module directory
+    - name: Checkout
       uses: actions/checkout@v2
       # 检出代码库
       with:
           fetch-depth: 0
+
+    - name: Set up Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.16
 
     - name: Run GoReleaser
       uses: goreleaser/goreleaser-action@v2
