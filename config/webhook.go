@@ -1,6 +1,7 @@
 package config
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"myddns/util"
@@ -82,7 +83,9 @@ func ExecWebhook(domains *Domains, conf *Config) {
 		if conf.WebhookRequestBody != "" {
 			method = "POST"
 			postPara = domains.replacePara(conf.WebhookRequestBody, v4Status, v6Status)
-			contentType = "application/json"
+			if json.Valid([]byte(postPara)) {
+				contentType = "application/json"
+			}
 		}
 		requestURL := domains.replacePara(conf.WebhookURL, v4Status, v6Status)
 		u, err := url.Parse(requestURL)

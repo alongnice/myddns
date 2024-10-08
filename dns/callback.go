@@ -1,6 +1,7 @@
 package dns
 
 import (
+	"encoding/json"
 	"log"
 	"myddns/config"
 	"myddns/util"
@@ -70,7 +71,9 @@ func (cb *Callback) addUpdateDomainRecords(recordType string) {
 		if cb.DNSConfig.Secret != "" {
 			method = "POST"
 			postPara = replacePara(cb.DNSConfig.ID, ipAddr, domain, recordType, cb.TTL)
-			contentType = "application/x-www-form-urlencoded"
+			if json.Valid([]byte(postPara)) {
+				contentType = "application/x-www-form-urlencoded"
+			}
 		}
 		requestURL := replacePara(cb.DNSConfig.ID, ipAddr, domain, recordType, cb.TTL)
 		u, err := url.Parse(requestURL)
