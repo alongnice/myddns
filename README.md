@@ -26,10 +26,22 @@
 
 - 下载[https://github.com/alongnice/myddns/releases](https://github.com/alongnice/myddns/releases)
 - 运行，程序将自行打开浏览器，访问 [http://127.0.0.1:12138](http://127.0.0.1:12138)完成配置修改
-- [可选] 支持启动带参数 `-l`监听地址 `-f`间隔时间（秒）。如：`./myddns -l 127.0.0.1:9876 -f 300` 
-- [可选] 服务管控
-  - Mac/Linux: `sudo ./myddns -s uninstall` 
+- [可选] 支持启动带参数 
+  - `-l`监听地址 
+  - `-f`间隔时间（秒）。
+  - `-c`配置文件路径
+  - 如：`./myddns -l 127.0.0.1:9876 -f 300 -c 自定义配置文件路径` 
+- [可选] 服务安装
+  - Mac/Linux: `./myddns -s uninstall` 
   - Win(以管理员打开cmd): `.\myddns.exe -s uninstall`
+- [可选] 服务卸载
+  - Mac/Linux: `./myddns -s uninstall` 
+  - Win(打开cmd): `.\myddns.exe -s uninstall`
+- [可选] 支持启动带参数 
+  - `-l`监听地址 
+  - `-f`同步间隔时间(秒)。
+  - `-c`配置文件路径
+  - 如：`./myddns -l 127.0.0.1:9876 -f 600`
 
 
 

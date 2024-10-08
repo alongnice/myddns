@@ -8,6 +8,7 @@ import (
 	"myddns/util"
 	"myddns/web"
 	"os"
+	"path/filepath"
 	"strconv"
 
 	"flag"
@@ -29,6 +30,9 @@ var every = flag.Int("f", 300, "同步间隔时间(秒)")
 // 服务类别
 var serviceType = flag.String("s", "", "服务管理, 支持install, uninstall")
 
+// 配置文件路径
+var configFilePath = flag.String("c", "", "自定义配置文件路径")
+
 //go:embed static
 var staticEmbededFiles embed.FS
 
@@ -39,6 +43,10 @@ func main() {
 	flag.Parse()
 	if _, err := net.ResolveTCPAddr("tcp", *listen); err != nil {
 		log.Fatalf("解析监听地址异常，%s", err)
+	}
+	if *configFilePath != "" {
+		absPath, _ := filepath.Abs(*configFilePath)
+		os.Setenv(util.ConfigFilePathENV, absPath)
 	}
 	switch *serviceType {
 	case "install":
@@ -60,7 +68,7 @@ func main() {
 				case "windows-service":
 					log.Println("可使用 .\\myddns.exe -s install 安装服务运行")
 				default:
-					log.Println("可使用 sudo ./myddns -s install 安装服务运行")
+					log.Println("可使用 ./myddns -s install 安装服务运行")
 				}
 				run(100 * time.Millisecond)
 			}
@@ -167,7 +175,7 @@ func installService() {
 		case "windows-service":
 			log.Println("如需卸载 myddns, 请以管理员身份运行cmd并确保使用如下命令: .\\myddns.exe uninstall")
 		default:
-			log.Println("如需卸载 myddns, 请确保使用如下命令: sudo ./myddns uninstall")
+			log.Println("如需卸载 myddns, 请确保使用如下命令: ./myddns uninstall")
 		}
 		log.Println("请在浏览器中进行配置。1分钟后自动关闭DOS窗口!")
 		time.Sleep(time.Minute)
@@ -179,7 +187,7 @@ func installService() {
 	case "windows-service":
 		log.Println("请以管理员身份运行cmd并确保使用如下命令: .\\myddns.exe -s install")
 	default:
-		log.Println("请确保使用如下命令: sudo ./myddns -s install")
+		log.Println("请确保使用如下命令: ./myddns -s install")
 	}
 	if status != service.StatusUnknown {
 		log.Println("myddns 服务已安装, 无需在次安装")
