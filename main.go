@@ -81,13 +81,13 @@ func run(firstDelay time.Duration) {
 	http.Handle("/static/", http.FileServer(http.FS(staticEmbededFiles)))
 	http.Handle("/favicon.ico", http.FileServer(http.FS(faviconEmbededFile)))
 
-	http.HandleFunc("/", config.BasicAuth(web.Writing))
-	http.HandleFunc("/save", config.BasicAuth(web.Save))
-	http.HandleFunc("/logs", config.BasicAuth(web.Logs))
-	http.HandleFunc("/clearLog", config.BasicAuth(web.ClearLog))
-	http.HandleFunc("/ipv4NetInterface", config.BasicAuth(web.IPv4NetInterface))
-	http.HandleFunc("/ipv6NetInterface", config.BasicAuth(web.IPv6NetInterface))
-	http.HandleFunc("/webhookTest", config.BasicAuth(web.WebhookTest))
+	http.HandleFunc("/", web.BasicAuth(web.Writing))
+	http.HandleFunc("/save", web.BasicAuth(web.Save))
+	http.HandleFunc("/logs", web.BasicAuth(web.Logs))
+	http.HandleFunc("/clearLog", web.BasicAuth(web.ClearLog))
+	http.HandleFunc("/ipv4NetInterface", web.BasicAuth(web.IPv4NetInterface))
+	http.HandleFunc("/ipv6NetInterface", web.BasicAuth(web.IPv6NetInterface))
+	http.HandleFunc("/webhookTest", web.BasicAuth(web.WebhookTest))
 
 	log.Println("监听", *listen, "...")
 	log.Println("http://127.0.0.1:12138")
@@ -100,7 +100,7 @@ func run(firstDelay time.Duration) {
 	err := http.ListenAndServe(*listen, nil)
 
 	if err != nil {
-		log.Println("启动时端口发生异常,1分钟内自动关闭窗口", err)
+		log.Println("启动时端口发生异常,检查端口占用情况", err)
 		time.Sleep(time.Minute)
 		os.Exit(1)
 	}
