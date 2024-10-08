@@ -64,11 +64,11 @@ var cache = &cacheType{}
 // 获得配置
 // func (conf *Config) InitConfigFromFile() error {
 func GetConfigCache() (conf Config, err error) {
+	cache.Lock.Lock()
+	defer cache.Lock.Unlock()
 	if cache.ConfigSingle != nil {
 		return *cache.ConfigSingle, cache.Err
 	}
-	cache.Lock.Lock()
-	defer cache.Lock.Unlock()
 
 	cache.ConfigSingle = &Config{}
 
@@ -100,6 +100,9 @@ func GetConfigCache() (conf Config, err error) {
 
 // 保存配置
 func (conf *Config) SaveConfig() (err error) {
+	cache.Lock.Lock()
+	defer cache.Lock.Unlock()
+	
 	byt, err := yaml.Marshal(conf)
 	if err != nil {
 		log.Println(err)
