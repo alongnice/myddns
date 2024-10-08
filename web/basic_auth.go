@@ -27,6 +27,14 @@ func BasicAuth(f ViewFunc) ViewFunc {
 		// 账号或密码为空跳过
 		conf, _ := config.GetConfigCache()
 
+		// 禁止公网访问
+		if conf.NotAllowWanAccess {
+			if !util.IsPrivateNetwork(r.RemoteAddr) || !util.IsPrivateNetwork(r.Host) {
+				w.WriteHeader(http.StatusForbidden)
+				return
+			}
+		}
+
 		// 禁止从公网访问
 		if conf.NotAllowWanAccess {
 			if !util.IsPrivateNetwork(r.RemoteAddr) || !util.IsPrivateNetwork(r.Host) {
