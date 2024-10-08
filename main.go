@@ -76,11 +76,13 @@ func run(firstDelay time.Duration) {
 	http.HandleFunc("/", config.BasicAuth(web.Writing))
 	http.HandleFunc("/save", config.BasicAuth(web.Save))
 	http.HandleFunc("/logs", config.BasicAuth(web.Logs))
+	http.HandleFunc("/clearLog", config.BasicAuth(web.ClearLog))
 	http.HandleFunc("/ipv4NetInterface", config.BasicAuth(web.IPv4NetInterface))
 	http.HandleFunc("/ipv6NetInterface", config.BasicAuth(web.IPv6NetInterface))
 	http.HandleFunc("/webhookTest", config.BasicAuth(web.WebhookTest))
 
 	log.Println("监听", *listen, "...")
+	log.Println("http://127.0.0.1:12138")
 
 	// 没有配置,自动打开浏览器
 	autoOpenExplorer()

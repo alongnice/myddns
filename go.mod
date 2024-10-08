@@ -1,6 +1,6 @@
 module myddns
 
-go 1.23.0
+go 1.23
 
 require (
 	github.com/kardianos/service v1.2.2

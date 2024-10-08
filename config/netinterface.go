@@ -36,12 +36,12 @@ func GetNetInterface() (ipv4NetInterfaces []NetInterface, ipv6NetInterfaces []Ne
 			for _, address := range addrs {
 				if ipnet, ok := address.(*net.IPNet); ok && ipnet.IP.IsGlobalUnicast() {
 					//获取蒙版前缀尺寸和蒙版尺寸
-					_, maskSize := ipnet.Mask.Size()
-					if maskSize == 128 && ipv6Unicast.Contains(ipnet.IP) {
+					ones, bits := ipnet.Mask.Size()
+					if bits == 128 && ones < bits && ipv6Unicast.Contains(ipnet.IP) {
 						ipv6 = append(ipv6, ipnet.IP.String())
 					}
 					// 32位的掩码为IPV4
-					if maskSize == 32 {
+					if bits == 32 {
 						ipv4 = append(ipv4, ipnet.IP.String())
 					}
 				}

@@ -48,7 +48,7 @@
 
 ## 自行构建
 
-> 开发环境 golang 1.16
+> 开发环境 golang 1.23
 + `make build` 构建本地编译版本的 `myddns` 可执行文件。
 + `make build_docker_image` 本地自动化编译、打包 Docker 镜像。
 
