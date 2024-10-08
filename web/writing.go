@@ -57,13 +57,13 @@ const displayCount int = 3
 
 func getHideIDSecret(conf *config.Config) (idHide string, secretHide string) {
 	// webhook 显示所有ID
-	if len(conf.DNS.ID) > displayCount {
+	if len(conf.DNS.ID) > displayCount && conf.DNS.Name != "callback" {
 		idHide = conf.DNS.ID[:displayCount] + strings.Repeat("*", len(conf.DNS.ID)-displayCount)
 	} else {
 		idHide = conf.DNS.ID
 	}
 	// webhook 显示所有Secret
-	if len(conf.DNS.Secret) > displayCount {
+	if len(conf.DNS.Secret) > displayCount && conf.DNS.Name != "callback" {
 		secretHide = conf.DNS.Secret[:displayCount] + strings.Repeat("*", len(conf.DNS.Secret)-displayCount)
 	} else {
 		secretHide = conf.DNS.Secret

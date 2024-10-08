@@ -19,6 +19,7 @@
 + cloudflare
 + 华为云
 + webhook
++ callback
 
 
 ## 普通环境使用
@@ -101,6 +102,23 @@ docker run -d \
   - 只勾选 `自定义关键词`, 输入的关键字必须包含在RequestBody的content中, 如：`你的公网IP变了`
   - URL中输入钉钉给你的 `Webhook地址` 
   - RequestBody中输入 `{"msgtype": "text","text": {"content": "你的公网IP变了：#{ipv4Addr}，域名更新结果：#{ipv4Result}"}}`
+
+## callback
+
+- 支持自定义回调支持更多第三方DNS供应商
+- 支持多行多域名
+- 支持如下变量
+
+  |  变量名   | 说明  |
+  |  ----  | ----  |
+  | #{ip}  | 新的IPv4/IPv6地址 |
+  | #{domain}  | 当前域名 |
+  | #{recordType}  | 记录类型 `A`或`AAAA` |
+  | #{ttl}  | ttl |
+- RequestBody为空GET请求，不为空POST请求
+
+
+
 ---
 
 - 在docker主机上打开[http://127.0.0.1:12138](http://127.0.0.1:12138)，修改你的配置，成功
