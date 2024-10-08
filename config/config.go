@@ -102,7 +102,7 @@ func GetConfigCache() (conf Config, err error) {
 func (conf *Config) SaveConfig() (err error) {
 	cache.Lock.Lock()
 	defer cache.Lock.Unlock()
-	
+
 	byt, err := yaml.Marshal(conf)
 	if err != nil {
 		log.Println(err)
@@ -125,81 +125,78 @@ func (conf *Config) SaveConfig() (err error) {
 
 func (conf *Config) GetIpv4Addr() (result string) {
 	// 从配置文件中读取ipv4地址
-	if conf.Ipv4.Enable {
-		// 判断从哪里获取ip
-		if conf.Ipv4.GetType == "netInterface" {
-			// 从网卡获取IP
-			ipv4, _, err := GetNetInterface()
-			if err != nil {
-				log.Println("获取ipv4地址失败")
-				return
-			}
-
-			for _, netInterface := range ipv4 {
-				if netInterface.Name == conf.Ipv4.NetInterface {
-					return netInterface.Address[0]
-				}
-			}
-			log.Println("从网卡中获取IPv4失败,网卡名:", conf.Ipv4.NetInterface)
+	// 判断从哪里获取ip
+	if conf.Ipv4.GetType == "netInterface" {
+		// 从网卡获取IP
+		ipv4, _, err := GetNetInterface()
+		if err != nil {
+			log.Println("获取ipv4地址失败")
 			return
 		}
 
-		client := http.Client{Timeout: 10 * time.Second}
-		resp, err := client.Get(conf.Ipv4.URL)
-		if err != nil {
-			// log.Println("获取ipv4地址失败")
-			log.Println(fmt.Sprintf("未能获得IPV4地址! <a target='blank' href='%s'>点击查看接口能否返回IPV4地址</a>,", conf.Ipv4.URL))
-			return
+		for _, netInterface := range ipv4 {
+			if netInterface.Name == conf.Ipv4.NetInterface {
+				return netInterface.Address[0]
+			}
 		}
-		defer resp.Body.Close()
-		// body, err := ioutill.ReadFile(resp.Body)
-		body, err := io.ReadAll(resp.Body)
-		if err != nil {
-			log.Println("ipv4 结果读取失败", conf.Ipv4.URL)
-			return
-		}
-		comp := regexp.MustCompile(Ipv4Reg)
-		result = comp.FindString(string(body))
+		log.Println("从网卡中获取IPv4失败,网卡名:", conf.Ipv4.NetInterface)
+		return
 	}
+
+	client := http.Client{Timeout: 10 * time.Second}
+	resp, err := client.Get(conf.Ipv4.URL)
+	if err != nil {
+		// log.Println("获取ipv4地址失败")
+		log.Println(fmt.Sprintf("未能获得IPV4地址! <a target='blank' href='%s'>点击查看接口能否返回IPV4地址</a>,", conf.Ipv4.URL))
+		return
+	}
+	defer resp.Body.Close()
+	// body, err := ioutill.ReadFile(resp.Body)
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Println(fmt.Sprintf("连接失败! <a target='blank' href='%s'>点击查看接口能否返回IPv4地址</a>,", conf.Ipv4.URL))
+		return
+	}
+	comp := regexp.MustCompile(Ipv4Reg)
+	result = comp.FindString(string(body))
+
 	return
 }
 
 func (conf *Config) GetIpv6Addr() (result string) {
 	// 从配置文件中读取ipv6地址
-	if conf.Ipv6.Enable {
-		// 判断从哪里获取ip
-		if conf.Ipv4.GetType == "netInterface" {
-			// 从网卡获取IP
-			ipv4, _, err := GetNetInterface()
-			if err != nil {
-				log.Println("获取ipv6地址失败")
-				return
-			}
-
-			for _, netInterface := range ipv4 {
-				if netInterface.Name == conf.Ipv4.NetInterface {
-					return netInterface.Address[0]
-				}
-			}
-			log.Println("从网卡中获取IPv6失败,网卡名:", conf.Ipv6.NetInterface)
+	// 判断从哪里获取ip
+	if conf.Ipv4.GetType == "netInterface" {
+		// 从网卡获取IP
+		ipv4, _, err := GetNetInterface()
+		if err != nil {
+			log.Println("获取ipv6地址失败")
 			return
 		}
 
-		client := http.Client{Timeout: 10 * time.Second}
-		resp, err := client.Get(conf.Ipv6.URL)
-		if err != nil {
-			log.Println(fmt.Sprintf("未能获得IPV6地址! <a target='blank' href='%s'>点击查看接口能否返回IPV6地址</a>, 官方说明:<a target='blank' href='%s'>点击访问</a> ", conf.Ipv6.URL, "https://github.com/alongnice/myddns#使用ipv6"))
+		for _, netInterface := range ipv4 {
+			if netInterface.Name == conf.Ipv4.NetInterface {
+				return netInterface.Address[0]
+			}
 		}
-		defer resp.Body.Close()
-		// body, err := ioutill.ReadFile(resp.Body)
-		body, err := io.ReadAll(resp.Body)
-		if err != nil {
-			log.Println("ipv6结果读取失败", conf.Ipv6.URL)
-			return
-		}
-		comp := regexp.MustCompile(Ipv6Reg)
-		result = comp.FindString(string(body))
+		log.Println("从网卡中获取IPv6失败,网卡名:", conf.Ipv6.NetInterface)
+		return
 	}
+
+	client := http.Client{Timeout: 10 * time.Second}
+	resp, err := client.Get(conf.Ipv6.URL)
+	if err != nil {
+		log.Println(fmt.Sprintf("连接失败! <a target='blank' href='%s'>点击查看接口能否返回IPv6地址</a>, 官方说明:<a target='blank' href='%s'>点击访问</a> ", conf.Ipv6.URL, "https://github.com/jeessy2/ddns-go#使用ipv6"))
+	}
+	defer resp.Body.Close()
+	// body, err := ioutill.ReadFile(resp.Body)
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Println("ipv6结果读取失败", conf.Ipv6.URL)
+		return
+	}
+	comp := regexp.MustCompile(Ipv6Reg)
+	result = comp.FindString(string(body))
 	return
 
 }

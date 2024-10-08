@@ -8,6 +8,10 @@ import (
 // 固定的主域名
 var staticMainDomains = []string{"com.cn", "org.cm", "net.cn", "ac.cn"}
 
+// 失败次数
+var GetIpv4FailTimes = 0
+var GetIpv6FailTimes = 0
+
 // 域名实体
 type Domain struct {
 	DomainName   string
@@ -47,7 +51,7 @@ func (d Domain) GetSubDomain() string {
 }
 
 // 校验域名
-func parseDomainArr(domainArr []string) (domains []*Domain) {
+func checkParseDomains(domainArr []string) (domains []*Domain) {
 	for _, domainStr := range domainArr {
 		domainStr = strings.TrimSpace(domainStr)
 		if domainStr == "" {
@@ -81,23 +85,42 @@ func parseDomainArr(domainArr []string) (domains []*Domain) {
 }
 
 // 获得ip并校验用户输入的域名
-func (domains *Domains) ParseDomain(conf *Config) {
+func (domains *Domains) GetNewIP(conf *Config) {
+	domains.Ipv4Domains = checkParseDomains(conf.Ipv4.Domains)
+	domains.Ipv4Domains = checkParseDomains(conf.Ipv6.Domains)
+
 	// IPv4
-	ipv4Addr := conf.GetIpv4Addr()
-	if ipv4Addr != "" {
-		domains.Ipv4Addr = ipv4Addr
-		domains.Ipv4Domains = parseDomainArr(conf.Ipv4.Domains)
+	if conf.Ipv4.Enable && len(domains.Ipv4Domains) > 0 {
+		ipv4Addr := conf.GetIpv4Addr()
+		if ipv4Addr != "" {
+			domains.Ipv4Addr = ipv4Addr
+			GetIpv4FailTimes = 0
+		} else {
+			GetIpv4FailTimes++
+			if GetIpv4FailTimes >= 3 {
+				domains.Ipv4Domains[0].UpdateStatus = UpdatedFail
+			}
+			log.Println("没有取得新IPv4的地址， 不会更新")
+		}
 	}
 	// IPv6
-	ipv6Addr := conf.GetIpv6Addr()
-	if ipv6Addr != "" {
-		domains.Ipv6Addr = ipv6Addr
-		domains.Ipv6Domains = parseDomainArr(conf.Ipv6.Domains)
+	if conf.Ipv6.Enable && len(domains.Ipv6Domains) > 0 {
+		ipv6Addr := conf.GetIpv6Addr()
+		if ipv6Addr != "" {
+			domains.Ipv6Addr = ipv6Addr
+			GetIpv6FailTimes = 0
+		} else {
+			GetIpv6FailTimes++
+			if GetIpv6FailTimes >= 3 {
+				domains.Ipv6Domains[0].UpdateStatus = UpdatedFail
+			}
+			log.Println("没有取得新IPv6的地址， 不会更新")
+		}
 	}
 }
 
 // 获得ParseDomain结果
-func (domains *Domains) ParseDomainResult(recordType string) (ipAddr string, retDomains []*Domain) {
+func (domains *Domains) GetNewIpResult(recordType string) (ipAddr string, retDomains []*Domain) {
 	if recordType == "AAAA" {
 		return domains.Ipv6Addr, domains.Ipv6Domains
 	}

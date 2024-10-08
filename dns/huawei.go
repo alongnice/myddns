@@ -47,7 +47,7 @@ type HuaweicloudRecordsResp struct {
 
 func (hw *Huaweicloud) Init(conf *config.Config) {
 	hw.DNSConfig = conf.DNS
-	hw.Domains.ParseDomain(conf)
+	hw.Domains.GetNewIP(conf)
 	if conf.TTL == "" {
 		hw.TTL = 300
 	} else {
@@ -67,7 +67,7 @@ func (hw *Huaweicloud) AddUpdateDomainRecords() config.Domains {
 	return hw.Domains
 }
 func (hw *Huaweicloud) addUpdateDomainRecords(recordType string) {
-	ipAddr, domains := hw.Domains.ParseDomainResult(recordType)
+	ipAddr, domains := hw.Domains.GetNewIpResult(recordType)
 
 	if ipAddr == "" {
 		return

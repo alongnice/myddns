@@ -19,7 +19,7 @@ type Callback struct {
 
 func (cb *Callback) Init(conf *config.Config) {
 	cb.DNSConfig = conf.DNS
-	cb.Domains.ParseDomain(conf)
+	cb.Domains.GetNewIP(conf)
 	if conf.TTL == "" {
 		cb.TTL = "600"
 	} else {
@@ -45,7 +45,7 @@ func replacePara(orgPara, ipAddr string, domain *config.Domain, recordType strin
 }
 
 func (cb *Callback) addUpdateDomainRecords(recordType string) {
-	ipAddr, domains := cb.Domains.ParseDomainResult(recordType)
+	ipAddr, domains := cb.Domains.GetNewIpResult(recordType)
 
 	if ipAddr == "" {
 		return

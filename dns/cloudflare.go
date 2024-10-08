@@ -59,7 +59,7 @@ type CloudflareZonesResp struct {
 // 初始化
 func (cf *Cloudflare) Init(conf *config.Config) {
 	cf.DNSConfig = conf.DNS
-	cf.Domains.ParseDomain(conf)
+	cf.Domains.GetNewIP(conf)
 	if conf.TTL == "" {
 		cf.TTL = 1
 	} else {
@@ -80,7 +80,7 @@ func (cf *Cloudflare) AddUpdateDomainRecords() config.Domains {
 }
 
 func (cf *Cloudflare) AddUpdateIpvDomainRecords(recordType string) {
-	ipAddr, domains := cf.Domains.ParseDomainResult(recordType)
+	ipAddr, domains := cf.Domains.GetNewIpResult(recordType)
 
 	if ipAddr == "" {
 		return
