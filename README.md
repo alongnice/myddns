@@ -8,7 +8,8 @@
 - 网页中简单配置,可设置用户名账号密码 禁止从公网访问
 - 支持接口/网卡获取IP
 - 默认设定间隔5分钟同步一次,支持TTL
-- 安装在系统中,支持 service 或者 systemctl 管理(v2.8.0)之后支持
+- 安装在系统中,支持 service 或者 systemctl 管理
+- 支持 webhook 通知
 - 复刻自 ddns-go
 
 
@@ -50,6 +51,9 @@
 - 挂载主机目录, 删除容器后配置不会丢失。可替换 `/opt/myddns` 为主机上的任意目录, 配置文件为隐藏文件
 
   ```bash
+  #host模式 同时支持ipv4/ipv6 linux系统推荐
+  docker run -d --name myddns --restart=always --net=host -p 9876:9876 -v /opt/myddns:/root alongnice/myddns
+  #host模式 只支持ipv4 mac/windows系统推荐
   docker run -d --name myddns --restart=always -p 9876:9876 -v /opt/myddns:/root alongnice/myddns
   ```
 

@@ -55,7 +55,7 @@ func main() {
 		uninstallService()
 	default:
 		if util.IsRunInDocker() {
-			run(100 * time.Millisecond)
+			run(5 * time.Millisecond)
 		} else {
 			s := getService()
 			status, _ := s.Status()
@@ -70,7 +70,7 @@ func main() {
 				default:
 					log.Println("可使用 ./myddns -s install 安装服务运行")
 				}
-				run(100 * time.Millisecond)
+				run(5 * time.Millisecond)
 			}
 		}
 	}
@@ -129,6 +129,8 @@ func getService() service.Service {
 	if service.ChosenSystem().String() == "unix-systemv" {
 		options["sysvScript"] = sysvScript
 		options["UserService"] = false
+	} else if service.ChosenSystem().String() == "linux-upstart" ||
+		service.ChosenSystem().String() == "linux-openrc" {
 	} else {
 		options["UserService"] = true
 	}
@@ -221,14 +223,13 @@ const sysvScript = `#!/bin/sh
 # processname: {{.Path}}
 ### BEGIN INIT INFO
 # Provides:          {{.Path}}
-# Required-Start:
-# Required-Stop:
+# Required-Start:	$local_fs $network $named $time
+# Required-Stop:	$local_fs $network $named
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
 # Short-Description: {{.DisplayName}}
 # Description:       {{.Description}}
 ### END INIT INFO
-START=99
 cmd="{{.Path}}{{range .Arguments}} {{.|cmd}}{{end}}"
 name=$(basename $(readlink -f $0))
 pid_file="/var/run/$name.pid"

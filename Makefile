@@ -1,7 +1,7 @@
 .PHONY: build clean test test-race
 # 支持参数
 
-VERSION=0.0.1
+VERSION=3.3.1
 BIN=myddns
 DIR_SRC=.
 DOCKER_CMD=docker

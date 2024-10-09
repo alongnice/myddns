@@ -6,7 +6,7 @@ import (
 )
 
 // 固定的主域名
-var staticMainDomains = []string{"com.cn", "org.cm", "net.cn", "ac.cn"}
+var staticMainDomains = []string{"com.cn", "org.cm", "net.cn", "ac.cn", "eu.org"}
 
 // 失败次数
 var GetIpv4FailTimes = 0
