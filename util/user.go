@@ -20,8 +20,8 @@ func GetConfigFromFile() string {
 func GetConfigFromFileDefault() string {
 	dir, err := homedir.Dir()
 	if err != nil {
-		log.Println("获取用户信息失败")
-		return "../.myddns_conf.yaml"
+		log.Println("获取路径失败!")
+		return "../.ddns_go_config.yaml"
 	}
-	return dir + string(os.PathSeparator) + ".myddns_conf.yaml"
+	return dir + string(os.PathSeparator) + ".ddns_go_config.yaml"
 }

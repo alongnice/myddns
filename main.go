@@ -164,24 +164,18 @@ func installService() {
 	s := getService()
 	status, err := s.Status()
 	if err != nil && status == service.StatusUnknown {
-		// 服务未知，创建服务
 		if err = s.Install(); err == nil {
 			s.Start()
-			log.Println("安装 myddns 服务成功! 程序会一直运行, 包括重启后。")
-			log.Println("不存在配置文件,请先在浏览器中进行配置。")
+			log.Println("安装 myddns 服务成功! 通过浏览器配置")
+			if service.ChosenSystem().String() == "Unix-systemv" {
+				log.Println("不能访问，则重启")
+			}
 			return
 		}
-		log.Printf("安装 myddns 服务失败, ERR: %s\n", err)
 
-		switch s.Platform() {
-		case "windows-service":
-			log.Println("如需卸载 myddns, 请以管理员身份运行cmd并确保使用如下命令: .\\myddns.exe uninstall")
-		default:
-			log.Println("如需卸载 myddns, 请确保使用如下命令: ./myddns uninstall")
+		if status != service.StatusUnknown {
+			log.Println("myddns 服务已安装, 无需二次安装")
 		}
-		log.Println("请在浏览器中进行配置。1分钟后自动关闭DOS窗口!")
-		time.Sleep(time.Minute)
-		return
 	}
 
 	log.Printf("安装 myddns 服务失败, ERR: %s\n", err)

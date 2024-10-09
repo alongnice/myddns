@@ -50,7 +50,7 @@ func BasicAuth(f ViewFunc) ViewFunc {
 		}
 
 		// 认证操作
-		BasicAuthPrefix := "Basic"
+		BasicAuthPrefix := "Basic "
 
 		// 获取请求头
 		auth := r.Header.Get("Authorization")
@@ -77,7 +77,6 @@ func BasicAuth(f ViewFunc) ViewFunc {
 				log.Printf("%s:登录失败次数过多", r.RemoteAddr)
 				time.Sleep(time.Second * 60)
 				ld.FailTimes = 0
-				return
 			}
 			log.Printf("%s:认证失败", r.RemoteAddr)
 		}
