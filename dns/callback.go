@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
-	"time"
 )
 
 type Callback struct {
@@ -88,8 +87,7 @@ func (cb *Callback) addUpdateDomainRecords(recordType string) {
 		}
 		req.Header.Add("Content-Type", contentType)
 
-		client := http.Client{}
-		client.Timeout = 30 * time.Second
+		client := util.CreateHTTPClient()
 		resp, err := client.Do(req)
 		body, err := util.GetHTTPResponseOrg(resp, u.String(), err)
 		if err == nil {

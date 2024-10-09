@@ -9,7 +9,6 @@ import (
 	"myddns/util"
 	"net/http"
 	"strconv"
-	"time"
 )
 
 const (
@@ -202,7 +201,7 @@ func (hw *Huaweicloud) request(method string, url string, data interface{}, resu
 	s.Sign(req)
 	req.Header.Add("content-type", "application/json")
 
-	client := http.Client{Timeout: 10 * time.Second}
+	client := util.CreateHTTPClient()
 	resp, err := client.Do(req)
 	err = util.GetHTTPResponse(resp, url, err, result)
 	return

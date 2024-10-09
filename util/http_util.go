@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"net"
 	"net/http"
+	"time"
 )
 
 // 获得并简单解析 http 接口返回json结果
@@ -40,4 +42,22 @@ func GetHTTPResponseOrg(resp *http.Response, url string, err error) ([]byte, err
 	}
 
 	return body, err
+}
+
+func CreateHTTPClient() *http.Client {
+	return &http.Client{
+		Timeout: 20 * time.Second,
+		Transport: &http.Transport{
+			// 传输层(TCP?)
+			Dial: (&net.Dialer{
+				Timeout: 5 * time.Second,
+				// 连接超时时间5s
+				KeepAlive: 30 * time.Second,
+				// 连接保持时间30s
+			}).Dial,
+			IdleConnTimeout: 10 * time.Second,
+			// 空闲链接超时时间
+		},
+	}
+	// 与linux平台的posix实现更加丰富 管控参数更加自由
 }

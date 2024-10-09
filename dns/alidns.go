@@ -7,7 +7,6 @@ import (
 	"myddns/util"
 	"net/http"
 	"net/url"
-	"time"
 )
 
 const (
@@ -160,7 +159,7 @@ func (ali *Alidns) request(params url.Values, result interface{}) (err error) {
 	}
 
 	// 创建一个http.Client，设置超时时间为30秒
-	client := http.Client{Timeout: 10 * time.Second}
+	client := util.CreateHTTPClient()
 	// 发送请求，获取响应
 	resp, err := client.Do(req)
 	// 使用util包中的GetHTTPResponse函数处理响应，并将结果保存到result中

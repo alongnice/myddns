@@ -9,7 +9,6 @@ import (
 	"myddns/util"
 	"net/http"
 	"strconv"
-	"time"
 )
 
 const (
@@ -195,7 +194,7 @@ func (cf *Cloudflare) request(method string, url string, data interface{}, resul
 	req.Header.Set("Content-Type", "application/json")
 
 	// 创建一个http.Client，设置超时时间为30秒
-	client := http.Client{Timeout: 10 * time.Second}
+	client := util.CreateHTTPClient()
 	// 发送请求，获取响应
 	resp, err := client.Do(req)
 	err = util.GetHTTPResponse(resp, url, err, result)
