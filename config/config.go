@@ -189,7 +189,7 @@ func (conf *Config) GetIpv6Addr() (result string) {
 	client := util.CreateHTTPClient()
 	resp, err := client.Get(conf.Ipv6.URL)
 	if err != nil {
-		log.Println(fmt.Sprintf("连接失败! <a target='blank' href='%s'>点击查看接口能否返回IPv6地址</a>, 官方说明:<a target='blank' href='%s'>点击访问</a> ", conf.Ipv6.URL, "https://github.com/jeessy2/ddns-go#使用ipv6"))
+		log.Println(fmt.Sprintf("连接失败! <a target='blank' href='%s'>点击查看接口能否返回IPv6地址</a>, 官方说明:<a target='blank' href='%s'>点击访问</a> ", conf.Ipv6.URL, "https://github.com/alongnice/myddns"))
 	}
 	defer resp.Body.Close()
 	// body, err := ioutill.ReadFile(resp.Body)

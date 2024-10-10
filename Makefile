@@ -19,7 +19,7 @@ build: $(DIR_SRC)/main.go
 # 编译
 
 build_docker_image: 
-	@$(DOCKER_CMD) build -f ./Dockerfile -t ddns-go:$(VERSION) .
+	@$(DOCKER_CMD) build -f ./Dockerfile -t myddns:$(VERSION) .
 # 构建docker镜像
 
 
