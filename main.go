@@ -128,10 +128,9 @@ func getService() service.Service {
 	options := make(service.KeyValue)
 	if service.ChosenSystem().String() == "unix-systemv" {
 		options["sysvScript"] = sysvScript
-		options["UserService"] = false
-	} else if service.ChosenSystem().String() == "linux-upstart" ||
-		service.ChosenSystem().String() == "linux-openrc" {
-	} else {
+	}
+	if service.ChosenSystem().String() == "darwin-launchd" ||
+		service.ChosenSystem().String() == "windowss-service" {
 		options["UserService"] = true
 	}
 
