@@ -1,7 +1,7 @@
 .PHONY: build clean test test-race
 # 支持参数
 
-VERSION=3.3.5
+VERSION=$(git describe --tags `git rev-list --tags --max-count=1`)
 BIN=myddns
 DIR_SRC=.
 DOCKER_CMD=docker

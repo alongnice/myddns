@@ -5,12 +5,20 @@ import (
 	"fmt"
 	"myddns/config"
 	"net/http"
+	"os"
 	"strings"
 	"text/template"
 )
 
 //go:embed writing.html
 var writingEmbedFile embed.FS
+
+const VersionEnv = "MYDDNS_VERSION"
+
+type writtingData struct {
+	config.Config
+	Version string
+}
 
 func Writing(writer http.ResponseWriter, request *http.Request) {
 	tmpl, err := template.ParseFS(writingEmbedFile, "writing.html")
@@ -28,7 +36,7 @@ func Writing(writer http.ResponseWriter, request *http.Request) {
 		conf.DNS.ID = idHide
 		conf.DNS.Secret = secretHide
 
-		tmpl.Execute(writer, &conf)
+		tmpl.Execute(writer, &writtingData{Config: conf, Version: os.Getenv(VersionEnv)})
 		return
 
 	}
@@ -49,7 +57,7 @@ func Writing(writer http.ResponseWriter, request *http.Request) {
 	// 默认禁止外部访问
 	conf.NotAllowWanAccess = true
 
-	tmpl.Execute(writer, conf)
+	tmpl.Execute(writer, &writtingData{Config: conf, Version: os.Getenv(VersionEnv)})
 }
 
 // 显示数目
