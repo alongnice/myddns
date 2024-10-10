@@ -8,6 +8,7 @@ import (
 	"myddns/util"
 	"os"
 	"regexp"
+	"strings"
 	"sync"
 
 	"gopkg.in/yaml.v2"
@@ -147,22 +148,28 @@ func (conf *Config) GetIpv4Addr() (result string) {
 	// 设置超时时间
 	// 禁用keep-DisableKeepAlives
 	// 发送http请求
-	resp, err := client.Get(conf.Ipv4.URL)
-	if err != nil {
-		// log.Println("获取ipv4地址失败")
-		log.Println(fmt.Sprintf("未能获得IPV4地址! <a target='blank' href='%s'>点击查看接口能否返回IPV4地址</a>,", conf.Ipv4.URL))
-		return
+	urls := strings.Split(conf.Ipv4.URL, ",") // 多个地址 改用 , 分割
+	for _, url := range urls {
+		url = strings.TrimSpace(url) // 去除空格
+		resp, err := client.Get(url)
+		if err != nil {
+			log.Println(fmt.Sprintf("连接失败! <a target='blank' href='%s'>点击查看接口能否返回IPv4地址</a>,", url))
+			continue
+		}
+		defer resp.Body.Close()
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			log.Println("读取" + url + "失败")
+			continue
+		}
+		comp := regexp.MustCompile(Ipv4Reg)
+		result = comp.FindString(string(body))
+		if result != "" {
+			return
+		} else {
+			log.Printf("从%s获取IP失败;错误码 %s\n", url, result)
+		}
 	}
-	defer resp.Body.Close()
-	// body, err := ioutill.ReadFile(resp.Body)
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		log.Println(fmt.Sprintf("连接失败! <a target='blank' href='%s'>点击查看接口能否返回IPv4地址</a>,", conf.Ipv4.URL))
-		return
-	}
-	comp := regexp.MustCompile(Ipv4Reg)
-	result = comp.FindString(string(body))
-
 	return
 }
 
@@ -187,19 +194,30 @@ func (conf *Config) GetIpv6Addr() (result string) {
 	}
 
 	client := util.CreateHTTPClient()
-	resp, err := client.Get(conf.Ipv6.URL)
-	if err != nil {
-		log.Println(fmt.Sprintf("连接失败! <a target='blank' href='%s'>点击查看接口能否返回IPv6地址</a>, 官方说明:<a target='blank' href='%s'>点击访问</a> ", conf.Ipv6.URL, "https://github.com/alongnice/myddns"))
+	urls := strings.Split(conf.Ipv6.URL, ",")
+	for _, url := range urls {
+		url = strings.TrimSpace(url)
+		resp, err := client.Get(url)
+		if err != nil {
+			log.Println(fmt.Sprintf("连接失败! <a target='blank' href='%s'>点击查看接口能否返回IPv6地址</a>, 官方说明:<a target='blank' href='%s'>点击访问</a> ", url, "https://github.com/alongnice/myddns"))
+			continue
+		}
+
+		defer resp.Body.Close()
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			log.Println("读取IPv6结果失败! 接口: ", url)
+			continue
+		}
+		comp := regexp.MustCompile(Ipv6Reg)
+		result = comp.FindString(string(body))
+		if result != "" {
+			return
+		} else {
+			log.Printf("获取IPv6结果失败! 接口: %s ,返回值: %s\n", url, result)
+		}
 	}
-	defer resp.Body.Close()
-	// body, err := ioutill.ReadFile(resp.Body)
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		log.Println("ipv6结果读取失败", conf.Ipv6.URL)
-		return
-	}
-	comp := regexp.MustCompile(Ipv6Reg)
-	result = comp.FindString(string(body))
+
 	return
 
 }
