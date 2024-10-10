@@ -3,6 +3,7 @@ package web
 import (
 	"myddns/config"
 	"myddns/dns"
+	"myddns/util"
 	"net/http"
 	"strings"
 )
@@ -49,6 +50,8 @@ func Save(writer http.ResponseWriter, request *http.Request) {
 	// 保存到用户目录
 	err := conf.SaveConfig()
 
+	util.Ipv4Cache.ForceCompare = true
+	util.Ipv6Cache.ForceCompare = true
 	go dns.RunOnce()
 
 	// 跳转

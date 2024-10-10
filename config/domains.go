@@ -2,6 +2,7 @@ package config
 
 import (
 	"log"
+	"myddns/util"
 	"strings"
 )
 
@@ -121,8 +122,20 @@ func (domains *Domains) GetNewIP(conf *Config) {
 
 // 获得ParseDomain结果
 func (domains *Domains) GetNewIpResult(recordType string) (ipAddr string, retDomains []*Domain) {
+	// ipv4
 	if recordType == "AAAA" {
-		return domains.Ipv6Addr, domains.Ipv6Domains
+		if util.Ipv6Cache.Check(domains.Ipv6Addr) {
+			return domains.Ipv6Addr, domains.Ipv6Domains
+		} else {
+			log.Println("ipv6没有改变，等待", util.MaxTimes-util.Ipv6Cache.Times+1, "次后更新")
+			return "", domains.Ipv6Domains
+		}
 	}
-	return domains.Ipv4Addr, domains.Ipv4Domains
+	// ipv6
+	if util.Ipv4Cache.Check(domains.Ipv4Addr) {
+		return domains.Ipv4Addr, domains.Ipv4Domains
+	} else {
+		log.Println("ipv4没有改变，等待", util.MaxTimes-util.Ipv4Cache.Times+1, "次后更新")
+		return "", domains.Ipv4Domains
+	}
 }

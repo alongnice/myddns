@@ -26,6 +26,8 @@ func GetHTTPResponse(resp *http.Response, url string, err error, result interfac
 func GetHTTPResponseOrg(resp *http.Response, url string, err error) ([]byte, error) {
 	if err != nil {
 		log.Println("接口请求", url, " 失败： ", err)
+		Ipv4Cache.ForceCompare = true
+		Ipv6Cache.ForceCompare = true
 		return nil, err
 	}
 
@@ -33,6 +35,8 @@ func GetHTTPResponseOrg(resp *http.Response, url string, err error) ([]byte, err
 	body, err := ioutil.ReadAll(resp.Body)
 
 	if err != nil {
+		Ipv4Cache.ForceCompare = true
+		Ipv6Cache.ForceCompare = true
 		log.Println("接口请求 失败： ", err, "URL", url)
 	}
 	if resp.StatusCode >= 300 {
